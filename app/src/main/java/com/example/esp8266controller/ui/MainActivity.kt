@@ -291,6 +291,8 @@ class MainActivity : AppCompatActivity() {
             val connectResult = connectionManager!!.connect()
             if (connectResult.isSuccess) {
                 tvConnectionStatus.text = connectionManager!!.getConnectionInfo()
+                // 连接成功后立即发送一次停止指令 (1500, 1500)，防止电机因旧状态乱转
+                connectionManager?.sendData("SS2:1500,1500\n")
             } else {
                 tvConnectionStatus.text = getString(R.string.disconnected)
                 val error = connectResult.exceptionOrNull()
@@ -308,6 +310,8 @@ class MainActivity : AppCompatActivity() {
             val connectResult = connectionManager!!.connect()
             if (connectResult.isSuccess) {
                 tvConnectionStatus.text = connectionManager!!.getConnectionInfo()
+                // 连接成功后立即发送一次停止指令 (1500, 1500)
+                connectionManager?.sendData("SS2:1500,1500\n")
             } else {
                 tvConnectionStatus.text = getString(R.string.disconnected)
                 val error = connectResult.exceptionOrNull()

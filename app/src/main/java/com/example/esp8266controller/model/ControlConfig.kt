@@ -6,7 +6,9 @@ enum class ControlMode {
 }
 
 data class ControlConfig(
-    val controlMode: ControlMode = ControlMode.MIXED,
+    val controlMode: ControlMode = ControlMode.SEPARATE, // 默认改为独立模式
+    val mixedChannel1: Int = 1, // 混控通道 1 对应的位置
+    val mixedChannel2: Int = 2, // 混控通道 2 对应的位置
     val throttleTemplate: String = "{value}",
     val steeringTemplate: String = "{value}",
     val servoLeftCommand: String = "SERVO_LEFT",

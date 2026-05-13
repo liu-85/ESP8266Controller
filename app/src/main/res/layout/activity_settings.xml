@@ -55,6 +55,69 @@
             </RadioGroup>
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/mixed_channels_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp"
+            android:padding="8dp"
+            android:background="#10000000"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="混控通道配置 (仅在混控模式生效):"
+                android:textSize="12sp"
+                android:textColor="@color/textDark"
+                android:layout_marginBottom="8dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="通道1分配:"
+                    android:textSize="14sp"/>
+
+                <Spinner
+                    android:id="@+id/spinner_mixed_ch1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:entries="@array/channel_options"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="通道2分配:"
+                    android:textSize="14sp"
+                    android:layout_marginStart="16dp"/>
+
+                <Spinner
+                    android:id="@+id/spinner_mixed_ch2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:entries="@array/channel_options"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="说明：\n1. 独立模式：左摇杆Y轴控制电机1，右摇杆Y轴控制电机2。\n2. 混控模式：自动计算差速逻辑，适用于坦克或差速车。\n3. SS2协议：发送 SS2:CH1,CH2 格式，中性点 1500。"
+            android:textSize="12sp"
+            android:textColor="#666666"
+            android:layout_marginBottom="16dp"
+            android:padding="8dp"
+            android:background="#F0F0F0"/>
+
         <!-- Wi-Fi Settings -->
         <LinearLayout
             android:id="@+id/wifi_settings_layout"

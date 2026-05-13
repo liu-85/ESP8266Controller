@@ -76,8 +76,20 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
     }
 
     fun formatCommand(throttleValue: Int, steeringValue: Int): String {
-        val throttleCommand = controlConfig.throttleTemplate.replace("{value}", throttleValue.toString())
-        val steeringCommand = controlConfig.steeringTemplate.replace("{value}", steeringValue.toString())
-        return "SS2:$throttleCommand,$steeringCommand\n"
+        val ch1: Int
+        val ch2: Int
+
+        if (controlConfig.controlMode == ControlMode.MIXED) {
+            // 混控模式：根据设置的通道分配混控后的值
+            // 如果 mixedChannel1 是 1，则 ch1 = throttleValue；如果是 2，则 ch1 = steeringValue
+            ch1 = if (controlConfig.mixedChannel1 == 1) throttleValue else steeringValue
+            ch2 = if (controlConfig.mixedChannel2 == 1) throttleValue else steeringValue
+        } else {
+            // 独立模式：默认 ch1=M1, ch2=M2 (已经由 processJoystickData 计算好)
+            ch1 = throttleValue
+            ch2 = steeringValue
+        }
+
+        return "SS2:$ch1,$ch2\n"
     }
 }

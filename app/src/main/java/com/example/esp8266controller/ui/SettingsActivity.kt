@@ -21,6 +21,9 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var rgControlMode: RadioGroup
     private lateinit var rbMixed: RadioButton
     private lateinit var rbSeparate: RadioButton
+    private lateinit var mixedChannelsLayout: LinearLayout
+    private lateinit var spinnerMixedCh1: Spinner
+    private lateinit var spinnerMixedCh2: Spinner
 
     private lateinit var wifiSettingsLayout: LinearLayout
     private lateinit var etWifiIp: EditText
@@ -81,6 +84,9 @@ class SettingsActivity : AppCompatActivity() {
         rgControlMode = findViewById<RadioGroup>(R.id.rg_control_mode)
         rbMixed = findViewById<RadioButton>(R.id.rb_mixed)
         rbSeparate = findViewById<RadioButton>(R.id.rb_separate)
+        mixedChannelsLayout = findViewById<LinearLayout>(R.id.mixed_channels_layout)
+        spinnerMixedCh1 = findViewById<Spinner>(R.id.spinner_mixed_ch1)
+        spinnerMixedCh2 = findViewById<Spinner>(R.id.spinner_mixed_ch2)
 
         wifiSettingsLayout = findViewById<LinearLayout>(R.id.wifi_settings_layout)
         etWifiIp = findViewById<EditText>(R.id.et_wifi_ip)
@@ -128,6 +134,14 @@ class SettingsActivity : AppCompatActivity() {
                     wifiSettingsLayout.visibility = android.view.View.GONE
                     bluetoothSettingsLayout.visibility = android.view.View.VISIBLE
                 }
+            }
+        }
+
+        rgControlMode.setOnCheckedChangeListener { _, checkedId ->
+            mixedChannelsLayout.visibility = if (checkedId == R.id.rb_mixed) {
+                android.view.View.VISIBLE
+            } else {
+                android.view.View.GONE
             }
         }
 
@@ -179,9 +193,14 @@ class SettingsActivity : AppCompatActivity() {
 
             if (config.controlConfig.controlMode == ControlMode.MIXED) {
                 rbMixed.isChecked = true
+                mixedChannelsLayout.visibility = android.view.View.VISIBLE
             } else {
                 rbSeparate.isChecked = true
+                mixedChannelsLayout.visibility = android.view.View.GONE
             }
+
+            spinnerMixedCh1.setSelection(config.controlConfig.mixedChannel1 - 1)
+            spinnerMixedCh2.setSelection(config.controlConfig.mixedChannel2 - 1)
 
             tvBluetoothDevice.text = config.connectionConfig.bluetoothName
 
@@ -245,6 +264,8 @@ class SettingsActivity : AppCompatActivity() {
                 ),
                 controlConfig = config.controlConfig.copy(
                     controlMode = if (rbMixed.isChecked) ControlMode.MIXED else ControlMode.SEPARATE,
+                    mixedChannel1 = spinnerMixedCh1.selectedItemPosition + 1,
+                    mixedChannel2 = spinnerMixedCh2.selectedItemPosition + 1,
                     throttleTemplate = etThrottleTemplate.text.toString(),
                     steeringTemplate = etSteeringTemplate.text.toString(),
                     servoLeftCommand = etServoLeft.text.toString(),
