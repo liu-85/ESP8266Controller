@@ -19,14 +19,14 @@ class WifiConnectionManager(
 
     private var socket: Socket? = null
     private var outputStream: OutputStreamWriter? = null
-    private var scope: CoroutineScope? = null
 
     override suspend fun connect(): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             _connectionState = ConnectionState.Connecting
-            socket = Socket(ipAddress, port)
-            socket?.soTimeout = 5000
-            outputStream = OutputStreamWriter(socket?.getOutputStream(), Charset.forName("UTF-8"))
+            val newSocket = Socket(ipAddress, port)
+            newSocket.soTimeout = 5000
+            socket = newSocket
+            outputStream = OutputStreamWriter(newSocket.getOutputStream(), Charset.forName("UTF-8"))
             _connectionState = ConnectionState.Connected("$ipAddress:$port")
             Result.success(Unit)
         } catch (e: Exception) {

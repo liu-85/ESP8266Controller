@@ -1,6 +1,5 @@
 package com.example.esp8266controller.connection
 
-import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
@@ -50,9 +49,10 @@ class BluetoothConnectionManager(
 
             deviceName = device.name ?: deviceAddress
 
-            bluetoothSocket = device.createRfcommSocketToServiceRecord(SPP_UUID)
-            bluetoothSocket?.connect()
-            outputStream = OutputStreamWriter(bluetoothSocket?.outputStream, Charsets.UTF_8)
+            val newSocket = device.createRfcommSocketToServiceRecord(SPP_UUID)
+            newSocket.connect()
+            bluetoothSocket = newSocket
+            outputStream = OutputStreamWriter(newSocket.outputStream, Charsets.UTF_8)
 
             _connectionState = ConnectionState.Connected(deviceName)
             Result.success(Unit)
