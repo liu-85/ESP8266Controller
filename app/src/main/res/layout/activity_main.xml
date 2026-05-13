@@ -29,7 +29,7 @@
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_manage"
-            android:tint="@color/colorAccent"
+            app:tint="@color/colorAccent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
@@ -40,7 +40,7 @@
             android:layout_marginStart="8dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_sort_by_size"
-            android:tint="@color/colorAccent"
+            app:tint="@color/colorAccent"
             app:layout_constraintStart_toEndOf="@id/btn_settings_top"
             app:layout_constraintTop_toTopOf="parent"/>
 
@@ -86,7 +86,7 @@
             android:layout_height="40dp"
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@android:drawable/ic_menu_camera"
-            android:tint="@color/colorAccent"
+            app:tint="@color/colorAccent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -252,7 +252,7 @@
             android:layout_marginEnd="8dp"
             android:background="@drawable/bg_gauge"
             android:src="@android:drawable/ic_media_previous"
-            android:tint="@color/colorAccent" />
+            app:tint="@color/colorAccent" />
 
         <ImageButton
             android:id="@+id/btn_servo_center_v7"
@@ -261,7 +261,7 @@
             android:layout_marginEnd="8dp"
             android:background="@drawable/bg_gauge"
             android:src="@android:drawable/ic_media_play"
-            android:tint="@color/v7rc_accent_left" />
+            app:tint="@color/v7rc_accent_left" />
 
         <ImageButton
             android:id="@+id/btn_servo_right_v7"
@@ -269,7 +269,7 @@
             android:layout_height="60dp"
             android:background="@drawable/bg_gauge"
             android:src="@android:drawable/ic_media_next"
-            android:tint="@color/v7rc_accent_right" />
+            app:tint="@color/v7rc_accent_right" />
     </LinearLayout>
 
     <!-- Invisible elements to maintain compatibility with existing code -->
