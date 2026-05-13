@@ -1,6 +1,7 @@
 package com.example.esp8266controller.ui
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -244,11 +245,16 @@ class SettingsActivity : AppCompatActivity() {
             return
         }
 
-        val bluetoothAdapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, "蓝牙不可用", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val pairedDevices = bluetoothAdapter.bondedDevices
 
         if (pairedDevices.isNotEmpty()) {
-            val deviceNames = pairedDevices.map { it.name }.toTypedArray()
+            val deviceNames = pairedDevices.map { it.name ?: it.address }.toTypedArray()
             val devicesArray = pairedDevices.toList()
 
             android.app.AlertDialog.Builder(this)
