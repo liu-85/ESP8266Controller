@@ -119,6 +119,39 @@
             android:textStyle="bold"
             android:layout_marginBottom="16dp"/>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="控制模式:"
+                android:textSize="14sp"/>
+
+            <RadioGroup
+                android:id="@+id/rg_control_mode"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="8dp">
+
+                <RadioButton
+                    android:id="@+id/rb_mixed"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="混控模式"/>
+
+                <RadioButton
+                    android:id="@+id/rb_separate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="独立模式"/>
+            </RadioGroup>
+        </LinearLayout>
+
         <EditText
             android:id="@+id/et_throttle_template"
             android:layout_width="match_parent"

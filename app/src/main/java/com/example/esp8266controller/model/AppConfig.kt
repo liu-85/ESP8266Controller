@@ -39,7 +39,10 @@ data class AppConfig(
 
         private fun loadControlConfig(prefs: SharedPreferences): ControlConfig {
             return ControlConfig(
-                throttleTemplate = prefs.getString("throttle_template", "CH1:{value}") ?: "CH1:{value}",
+                controlMode = ControlMode.valueOf(
+                    prefs.getString("control_mode", ControlMode.MIXED.name) ?: ControlMode.MIXED.name
+                ),
+                throttleTemplate = prefs.getString("throttle_template", "{value}") ?: "{value}",
                 steeringTemplate = prefs.getString("steering_template", "CH2:{value}") ?: "CH2:{value}",
                 servoLeftCommand = prefs.getString("servo_left", "SERVO:0") ?: "SERVO:0",
                 servoCenterCommand = prefs.getString("servo_center", "SERVO:90") ?: "SERVO:90",
@@ -83,6 +86,7 @@ data class AppConfig(
                 putString("bluetooth_address", config.connectionConfig.bluetoothAddress)
                 putString("bluetooth_name", config.connectionConfig.bluetoothName)
 
+                putString("control_mode", config.controlConfig.controlMode.name)
                 putString("throttle_template", config.controlConfig.throttleTemplate)
                 putString("steering_template", config.controlConfig.steeringTemplate)
                 putString("servo_left", config.controlConfig.servoLeftCommand)

@@ -238,7 +238,11 @@ class MainActivity : AppCompatActivity() {
     private suspend fun sendControlData() {
         connectionManager?.let { manager ->
             if (manager.connectionState is ConnectionState.Connected) {
-                val command = dataProcessor?.formatCommand(lastThrottleValue, lastSteeringValue)
+                // 如果摇杆没有被触摸，确保发送中性值 1500
+                val throttle = if (leftJoystick.strength < 0.05f) 1500 else lastThrottleValue
+                val steering = if (rightJoystick.strength < 0.05f) 1500 else lastSteeringValue
+                
+                val command = dataProcessor?.formatCommand(throttle, steering)
                 command?.let { payload ->
                     val sendResult = manager.sendData(payload)
                     if (sendResult.isFailure) {

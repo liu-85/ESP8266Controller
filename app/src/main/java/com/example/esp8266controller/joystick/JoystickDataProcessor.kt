@@ -16,19 +16,23 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
         steeringAngle: Double,
         steeringStrength: Float
     ): ChannelData {
-        val throttle = mapToChannelValue(throttleAngle, throttleStrength, isThrottle = true)
-        val steering = mapToChannelValue(steeringAngle, steeringStrength, isThrottle = false)
-        return ChannelData(throttle, steering)
+        return if (controlConfig.controlMode == ControlMode.MIXED) {
+            val throttle = mapToChannelValue(throttleAngle, throttleStrength, isVertical = true)
+            val steering = mapToChannelValue(steeringAngle, steeringStrength, isVertical = false)
+            ChannelData(throttle, steering)
+        } else {
+            // SEPARATE 模式: 左摇杆 Y 轴控制 M1, 右摇杆 Y 轴控制 M2
+            val m1 = mapToChannelValue(throttleAngle, throttleStrength, isVertical = true)
+            val m2 = mapToChannelValue(steeringAngle, steeringStrength, isVertical = true)
+            ChannelData(m1, m2)
+        }
     }
 
-    private fun mapToChannelValue(angle: Double, strength: Float, isThrottle: Boolean): Int {
+    private fun mapToChannelValue(angle: Double, strength: Float, isVertical: Boolean): Int {
         val center = controlConfig.centerValue
         val minVal = controlConfig.minChannelValue
         val maxVal = controlConfig.maxChannelValue
         val range = (maxVal - minVal) / 2
-
-        // For throttle: 0° (top) = forward, 180° (bottom) = backward
-        // For steering: 90° (right) = right, 270° (left) = left
 
         val normalizedStrength = strength.coerceIn(0f, 1f)
 
@@ -38,8 +42,8 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
 
         val valueOffset = (range * normalizedStrength).toInt()
 
-        return if (isThrottle) {
-            // Throttle: angle near 0° (top) -> forward, near 180° (bottom) -> backward
+        return if (isVertical) {
+            // Vertical: angle near 0° (top) -> forward, near 180° (bottom) -> backward
             val adjustedAngle = when {
                 angle >= 0 && angle <= 90 -> 90 - angle // Top quadrant
                 angle > 90 && angle <= 270 -> 90 - angle // Bottom half (negative values)
@@ -54,7 +58,7 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
                 else -> center
             }
         } else {
-            // Steering: angle near 90° (right) -> right, near 270° (left) -> left
+            // Horizontal: angle near 90° (right) -> right, near 270° (left) -> left
             val adjustedAngle = when {
                 angle >= 0 && angle <= 180 -> angle - 90 // Right half
                 angle > 180 && angle <= 360 -> angle - 270 // Left half

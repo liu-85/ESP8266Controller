@@ -18,6 +18,10 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var rbWifi: RadioButton
     private lateinit var rbBluetooth: RadioButton
 
+    private lateinit var rgControlMode: RadioGroup
+    private lateinit var rbMixed: RadioButton
+    private lateinit var rbSeparate: RadioButton
+
     private lateinit var wifiSettingsLayout: LinearLayout
     private lateinit var etWifiIp: EditText
     private lateinit var etWifiPort: EditText
@@ -73,6 +77,10 @@ class SettingsActivity : AppCompatActivity() {
         rgConnectionType = findViewById<RadioGroup>(R.id.rg_connection_type)
         rbWifi = findViewById<RadioButton>(R.id.rb_wifi)
         rbBluetooth = findViewById<RadioButton>(R.id.rb_bluetooth)
+
+        rgControlMode = findViewById<RadioGroup>(R.id.rg_control_mode)
+        rbMixed = findViewById<RadioButton>(R.id.rb_mixed)
+        rbSeparate = findViewById<RadioButton>(R.id.rb_separate)
 
         wifiSettingsLayout = findViewById<LinearLayout>(R.id.wifi_settings_layout)
         etWifiIp = findViewById<EditText>(R.id.et_wifi_ip)
@@ -169,6 +177,12 @@ class SettingsActivity : AppCompatActivity() {
             etWifiIp.setText(config.connectionConfig.wifiIp)
             etWifiPort.setText(config.connectionConfig.wifiPort.toString())
 
+            if (config.controlConfig.controlMode == ControlMode.MIXED) {
+                rbMixed.isChecked = true
+            } else {
+                rbSeparate.isChecked = true
+            }
+
             tvBluetoothDevice.text = config.connectionConfig.bluetoothName
 
             // Control
@@ -230,6 +244,7 @@ class SettingsActivity : AppCompatActivity() {
                     bluetoothName = bluetoothName ?: config.connectionConfig.bluetoothName
                 ),
                 controlConfig = config.controlConfig.copy(
+                    controlMode = if (rbMixed.isChecked) ControlMode.MIXED else ControlMode.SEPARATE,
                     throttleTemplate = etThrottleTemplate.text.toString(),
                     steeringTemplate = etSteeringTemplate.text.toString(),
                     servoLeftCommand = etServoLeft.text.toString(),
