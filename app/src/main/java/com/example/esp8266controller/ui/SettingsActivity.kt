@@ -3,6 +3,7 @@ package com.example.esp8266controller.ui
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -131,6 +132,14 @@ class SettingsActivity : AppCompatActivity() {
             tvBluetoothDevice.text = config.connectionConfig.bluetoothName
             etThrottleTemplate.setText(config.controlConfig.throttleTemplate)
             etSteeringTemplate.setText(config.controlConfig.steeringTemplate)
+
+            // 更新标题版本号
+            try {
+                val pInfo = packageManager.getPackageInfo(packageName, 0)
+                tvSettingsTitle.text = "控制中心(Ver.${pInfo.versionName})"
+            } catch (e: Exception) {
+                tvSettingsTitle.text = "控制中心"
+            }
         }
     }
 
