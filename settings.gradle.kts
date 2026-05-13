@@ -14,4 +14,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "ESP8266Controller"
-include ':app'
+// ...existing code...
+include(":app")
+// ...existing code...
