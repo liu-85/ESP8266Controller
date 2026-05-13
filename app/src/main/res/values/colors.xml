@@ -7,6 +7,9 @@
     <color name="black">#000000</color>
     <color name="gray">#757575</color>
     <color name="v7rc_bg">#2C2C2C</color>
+    <color name="v7rc_row_bg">#3D3D3D</color>
+    <color name="v7rc_input_bg">#252525</color>
+    <color name="v7rc_yellow">#FFD700</color>
     <color name="v7rc_gauge">#3D3D3D</color>
     <color name="v7rc_accent_left">#4FC3F7</color>
     <color name="v7rc_accent_right">#FFF176</color>

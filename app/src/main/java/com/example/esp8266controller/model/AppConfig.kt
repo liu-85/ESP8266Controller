@@ -42,8 +42,12 @@ data class AppConfig(
                 controlMode = ControlMode.valueOf(
                     prefs.getString("control_mode", ControlMode.SEPARATE.name) ?: ControlMode.SEPARATE.name
                 ),
-                mixedChannel1 = prefs.getInt("mixed_channel_1", 1),
-                mixedChannel2 = prefs.getInt("mixed_channel_2", 2),
+                ch1Source = ChannelSource.valueOf(
+                    prefs.getString("ch1_source", ChannelSource.THROTTLE.name) ?: ChannelSource.THROTTLE.name
+                ),
+                ch2Source = ChannelSource.valueOf(
+                    prefs.getString("ch2_source", ChannelSource.STEERING.name) ?: ChannelSource.STEERING.name
+                ),
                 throttleTemplate = prefs.getString("throttle_template", "{value}") ?: "{value}",
                 steeringTemplate = prefs.getString("steering_template", "CH2:{value}") ?: "CH2:{value}",
                 servoLeftCommand = prefs.getString("servo_left", "SERVO:0") ?: "SERVO:0",
@@ -89,8 +93,8 @@ data class AppConfig(
                 putString("bluetooth_name", config.connectionConfig.bluetoothName)
 
                 putString("control_mode", config.controlConfig.controlMode.name)
-                putInt("mixed_channel_1", config.controlConfig.mixedChannel1)
-                putInt("mixed_channel_2", config.controlConfig.mixedChannel2)
+                putString("ch1_source", config.controlConfig.ch1Source.name)
+                putString("ch2_source", config.controlConfig.ch2Source.name)
                 putString("throttle_template", config.controlConfig.throttleTemplate)
                 putString("steering_template", config.controlConfig.steeringTemplate)
                 putString("servo_left", config.controlConfig.servoLeftCommand)

@@ -14,6 +14,9 @@ import com.example.esp8266controller.model.*
 
 class SettingsActivity : AppCompatActivity() {
 
+    private lateinit var btnBack: ImageButton
+    private lateinit var tvSettingsTitle: TextView
+
     private lateinit var rgConnectionType: RadioGroup
     private lateinit var rbWifi: RadioButton
     private lateinit var rbBluetooth: RadioButton
@@ -35,29 +38,6 @@ class SettingsActivity : AppCompatActivity() {
 
     private lateinit var etThrottleTemplate: EditText
     private lateinit var etSteeringTemplate: EditText
-    private lateinit var etServoLeft: EditText
-    private lateinit var etServoCenter: EditText
-    private lateinit var etServoRight: EditText
-
-    private lateinit var etSwitch1Name: EditText
-    private lateinit var etSwitch1On: EditText
-    private lateinit var etSwitch1Off: EditText
-    private lateinit var etSwitch2Name: EditText
-    private lateinit var etSwitch2On: EditText
-    private lateinit var etSwitch2Off: EditText
-    private lateinit var etSwitch3Name: EditText
-    private lateinit var etSwitch3On: EditText
-    private lateinit var etSwitch3Off: EditText
-    private lateinit var etSwitch4Name: EditText
-    private lateinit var etSwitch4On: EditText
-    private lateinit var etSwitch4Off: EditText
-
-    private lateinit var seekbarGyroSensitivity: SeekBar
-    private lateinit var tvSensitivityValue: TextView
-
-    private lateinit var btnSave: Button
-    private lateinit var btnConnect: Button
-    private lateinit var btnDisconnect: Button
 
     private var appConfig: AppConfig? = null
     private var selectedBluetoothDevice: BluetoothDevice? = null
@@ -77,65 +57,34 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        rgConnectionType = findViewById<RadioGroup>(R.id.rg_connection_type)
-        rbWifi = findViewById<RadioButton>(R.id.rb_wifi)
-        rbBluetooth = findViewById<RadioButton>(R.id.rb_bluetooth)
+        btnBack = findViewById(R.id.btn_back)
+        tvSettingsTitle = findViewById(R.id.tv_settings_title)
 
-        rgControlMode = findViewById<RadioGroup>(R.id.rg_control_mode)
-        rbMixed = findViewById<RadioButton>(R.id.rb_mixed)
-        rbSeparate = findViewById<RadioButton>(R.id.rb_separate)
-        mixedChannelsLayout = findViewById<LinearLayout>(R.id.mixed_channels_layout)
-        spinnerMixedCh1 = findViewById<Spinner>(R.id.spinner_mixed_ch1)
-        spinnerMixedCh2 = findViewById<Spinner>(R.id.spinner_mixed_ch2)
+        rgConnectionType = findViewById(R.id.rg_connection_type)
+        rbWifi = findViewById(R.id.rb_wifi)
+        rbBluetooth = findViewById(R.id.rb_bluetooth)
 
-        wifiSettingsLayout = findViewById<LinearLayout>(R.id.wifi_settings_layout)
-        etWifiIp = findViewById<EditText>(R.id.et_wifi_ip)
-        etWifiPort = findViewById<EditText>(R.id.et_wifi_port)
+        rgControlMode = findViewById(R.id.rg_control_mode)
+        rbMixed = findViewById(R.id.rb_mixed)
+        rbSeparate = findViewById(R.id.rb_separate)
+        mixedChannelsLayout = findViewById(R.id.mixed_channels_layout)
+        spinnerMixedCh1 = findViewById(R.id.spinner_mixed_ch1)
+        spinnerMixedCh2 = findViewById(R.id.spinner_mixed_ch2)
 
-        bluetoothSettingsLayout = findViewById<LinearLayout>(R.id.bluetooth_settings_layout)
-        btnScanBluetooth = findViewById<Button>(R.id.btn_scan_bluetooth)
-        tvBluetoothDevice = findViewById<TextView>(R.id.tv_bluetooth_device)
+        wifiSettingsLayout = findViewById(R.id.wifi_settings_layout)
+        etWifiIp = findViewById(R.id.et_wifi_ip)
+        etWifiPort = findViewById(R.id.et_wifi_port)
+        btnSaveConfig = findViewById(R.id.btn_save_config)
 
-        etThrottleTemplate = findViewById<EditText>(R.id.et_throttle_template)
-        etSteeringTemplate = findViewById<EditText>(R.id.et_steering_template)
-        etServoLeft = findViewById<EditText>(R.id.et_servo_left)
-        etServoCenter = findViewById<EditText>(R.id.et_servo_center)
-        etServoRight = findViewById<EditText>(R.id.et_servo_right)
+        btnScanBluetooth = findViewById(R.id.btn_scan_bluetooth)
+        tvBluetoothDevice = findViewById(R.id.tv_bluetooth_device)
 
-        etSwitch1Name = findViewById<EditText>(R.id.et_switch1_name)
-        etSwitch1On = findViewById<EditText>(R.id.et_switch1_on)
-        etSwitch1Off = findViewById<EditText>(R.id.et_switch1_off)
-        etSwitch2Name = findViewById<EditText>(R.id.et_switch2_name)
-        etSwitch2On = findViewById<EditText>(R.id.et_switch2_on)
-        etSwitch2Off = findViewById<EditText>(R.id.et_switch2_off)
-        etSwitch3Name = findViewById<EditText>(R.id.et_switch3_name)
-        etSwitch3On = findViewById<EditText>(R.id.et_switch3_on)
-        etSwitch3Off = findViewById<EditText>(R.id.et_switch3_off)
-        etSwitch4Name = findViewById<EditText>(R.id.et_switch4_name)
-        etSwitch4On = findViewById<EditText>(R.id.et_switch4_on)
-        etSwitch4Off = findViewById<EditText>(R.id.et_switch4_off)
-
-        seekbarGyroSensitivity = findViewById<SeekBar>(R.id.seekbar_gyro_sensitivity)
-        tvSensitivityValue = findViewById<TextView>(R.id.tv_sensitivity_value)
-
-        btnSave = findViewById<Button>(R.id.btn_save)
-        btnConnect = findViewById<Button>(R.id.btn_connect)
-        btnDisconnect = findViewById<Button>(R.id.btn_disconnect)
+        etThrottleTemplate = findViewById(R.id.et_throttle_template)
+        etSteeringTemplate = findViewById(R.id.et_steering_template)
     }
 
     private fun setupListeners() {
-        rgConnectionType.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.rb_wifi -> {
-                    wifiSettingsLayout.visibility = android.view.View.VISIBLE
-                    bluetoothSettingsLayout.visibility = android.view.View.GONE
-                }
-                R.id.rb_bluetooth -> {
-                    wifiSettingsLayout.visibility = android.view.View.GONE
-                    bluetoothSettingsLayout.visibility = android.view.View.VISIBLE
-                }
-            }
-        }
+        btnBack.setOnClickListener { finish() }
 
         rgControlMode.setOnCheckedChangeListener { _, checkedId ->
             mixedChannelsLayout.visibility = if (checkedId == R.id.rb_mixed) {
@@ -149,31 +98,8 @@ class SettingsActivity : AppCompatActivity() {
             scanBluetoothDevices()
         }
 
-        seekbarGyroSensitivity.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                val sensitivity = (progress + 1) / 10f // Range 0.1 to 2.1
-                tvSensitivityValue.text = sensitivity.toString()
-            }
-
-            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-        })
-
-        btnSave.setOnClickListener {
+        btnSaveConfig.setOnClickListener {
             saveConfig()
-            setResult(RESULT_OK)
-            finish()
-        }
-
-        btnConnect.setOnClickListener {
-            saveConfig()
-            setResult(RESULT_OK)
-            finish()
-        }
-
-        btnDisconnect.setOnClickListener {
-            setResult(RESULT_OK)
-            finish()
         }
     }
 
@@ -199,47 +125,12 @@ class SettingsActivity : AppCompatActivity() {
                 mixedChannelsLayout.visibility = android.view.View.GONE
             }
 
-            spinnerMixedCh1.setSelection(config.controlConfig.mixedChannel1 - 1)
-            spinnerMixedCh2.setSelection(config.controlConfig.mixedChannel2 - 1)
+            spinnerMixedCh1.setSelection(config.controlConfig.ch1Source.ordinal)
+            spinnerMixedCh2.setSelection(config.controlConfig.ch2Source.ordinal)
 
             tvBluetoothDevice.text = config.connectionConfig.bluetoothName
-
-            // Control
             etThrottleTemplate.setText(config.controlConfig.throttleTemplate)
             etSteeringTemplate.setText(config.controlConfig.steeringTemplate)
-            etServoLeft.setText(config.controlConfig.servoLeftCommand)
-            etServoCenter.setText(config.controlConfig.servoCenterCommand)
-            etServoRight.setText(config.controlConfig.servoRightCommand)
-
-            // Custom switches
-            config.customSwitches.forEachIndexed { index, switch ->
-                when (index) {
-                    0 -> {
-                        etSwitch1Name.setText(switch.name)
-                        etSwitch1On.setText(switch.onCommand)
-                        etSwitch1Off.setText(switch.offCommand)
-                    }
-                    1 -> {
-                        etSwitch2Name.setText(switch.name)
-                        etSwitch2On.setText(switch.onCommand)
-                        etSwitch2Off.setText(switch.offCommand)
-                    }
-                    2 -> {
-                        etSwitch3Name.setText(switch.name)
-                        etSwitch3On.setText(switch.onCommand)
-                        etSwitch3Off.setText(switch.offCommand)
-                    }
-                    3 -> {
-                        etSwitch4Name.setText(switch.name)
-                        etSwitch4On.setText(switch.onCommand)
-                        etSwitch4Off.setText(switch.offCommand)
-                    }
-                }
-            }
-
-            // Gyro
-            val sensitivityProgress = ((config.gyroSensitivity * 10) - 1).toInt()
-            seekbarGyroSensitivity.progress = sensitivityProgress
         }
     }
 
@@ -264,24 +155,18 @@ class SettingsActivity : AppCompatActivity() {
                 ),
                 controlConfig = config.controlConfig.copy(
                     controlMode = if (rbMixed.isChecked) ControlMode.MIXED else ControlMode.SEPARATE,
-                    mixedChannel1 = spinnerMixedCh1.selectedItemPosition + 1,
-                    mixedChannel2 = spinnerMixedCh2.selectedItemPosition + 1,
+                    ch1Source = ChannelSource.values()[spinnerMixedCh1.selectedItemPosition],
+                    ch2Source = ChannelSource.values()[spinnerMixedCh2.selectedItemPosition],
                     throttleTemplate = etThrottleTemplate.text.toString(),
-                    steeringTemplate = etSteeringTemplate.text.toString(),
-                    servoLeftCommand = etServoLeft.text.toString(),
-                    servoCenterCommand = etServoCenter.text.toString(),
-                    servoRightCommand = etServoRight.text.toString()
-                ),
-                customSwitches = listOf(
-                    CustomSwitch(1, etSwitch1Name.text.toString(), etSwitch1On.text.toString(), etSwitch1Off.text.toString()),
-                    CustomSwitch(2, etSwitch2Name.text.toString(), etSwitch2On.text.toString(), etSwitch2Off.text.toString()),
-                    CustomSwitch(3, etSwitch3Name.text.toString(), etSwitch3On.text.toString(), etSwitch3Off.text.toString()),
-                    CustomSwitch(4, etSwitch4Name.text.toString(), etSwitch4On.text.toString(), etSwitch4Off.text.toString())
-                ),
-                gyroSensitivity = (seekbarGyroSensitivity.progress + 1) / 10f
+                    steeringTemplate = etSteeringTemplate.text.toString()
+                )
             )
 
             AppConfig.save(this, newConfig)
+            Toast.makeText(this, "配置已储存", Toast.LENGTH_SHORT).show()
+            
+            // Also trigger reconnect by setting result
+            setResult(RESULT_OK)
         }
     }
 

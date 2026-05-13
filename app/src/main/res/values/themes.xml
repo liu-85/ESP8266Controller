@@ -16,4 +16,28 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:gravity">center</item>
     </style>
+
+    <style name="V7RCEditText" parent="Widget.AppCompat.EditText">
+        <item name="android:background">@drawable/bg_v7rc_input</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:padding">8dp</item>
+    </style>
+
+    <style name="V7RCTextLabel">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
+    <style name="V7RCActionButton" parent="Widget.MaterialComponents.Button">
+        <item name="backgroundTint">@color/v7rc_row_bg</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="cornerRadius">8dp</item>
+    </style>
+
+    <style name="V7RCYellowButton" parent="V7RCActionButton">
+        <item name="backgroundTint">@color/v7rc_yellow</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
 </resources>

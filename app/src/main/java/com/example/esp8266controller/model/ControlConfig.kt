@@ -5,10 +5,16 @@ enum class ControlMode {
     SEPARATE    // 独立模式 (M1, M2 分开控制)
 }
 
+enum class ChannelSource {
+    THROTTLE,
+    STEERING,
+    NEUTRAL
+}
+
 data class ControlConfig(
-    val controlMode: ControlMode = ControlMode.SEPARATE, // 默认改为独立模式
-    val mixedChannel1: Int = 1, // 混控通道 1 对应的位置
-    val mixedChannel2: Int = 2, // 混控通道 2 对应的位置
+    val controlMode: ControlMode = ControlMode.SEPARATE,
+    val ch1Source: ChannelSource = ChannelSource.THROTTLE,
+    val ch2Source: ChannelSource = ChannelSource.STEERING,
     val throttleTemplate: String = "{value}",
     val steeringTemplate: String = "{value}",
     val servoLeftCommand: String = "SERVO_LEFT",

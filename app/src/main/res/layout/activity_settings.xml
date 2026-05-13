@@ -1,507 +1,261 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundGray">
+    android:background="@color/v7rc_bg"
+    tools:context=".ui.SettingsActivity">
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <!-- Watermark/Background Decoration (Simplified) -->
+    <ImageView
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+        android:alpha="0.05"
+        android:src="@drawable/ic_launcher_foreground"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"/>
+
+    <!-- Back Button -->
+    <ImageButton
+        android:id="@+id/btn_back"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:background="@drawable/bg_gauge"
+        android:src="@android:drawable/ic_media_previous"
+        app:tint="@color/v7rc_yellow"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/tv_settings_title"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:layout_margin="16dp"
+        android:text="控制中心(Ver.1.0.0)"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
 
-        <!-- Connection Settings -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="连接设置"
-            android:textSize="18sp"
-            android:textColor="@color/textDark"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="连接方式:"
-                android:textSize="14sp"/>
-
-            <RadioGroup
-                android:id="@+id/rg_connection_type"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginStart="8dp">
-
-                <RadioButton
-                    android:id="@+id/rb_wifi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/wifi"/>
-
-                <RadioButton
-                    android:id="@+id/rb_bluetooth"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/bluetooth"/>
-            </RadioGroup>
-        </LinearLayout>
+    <ScrollView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="16dp"
+        app:layout_constraintTop_toBottomOf="@id/tv_settings_title"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintWidth_percent="0.6"
+        app:layout_constraintHorizontal_bias="0.95">
 
         <LinearLayout
-            android:id="@+id/mixed_channels_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:layout_marginBottom="16dp"
-            android:padding="8dp"
-            android:background="#10000000"
-            android:visibility="gone">
+            android:padding="8dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="混控通道配置 (仅在混控模式生效):"
-                android:textSize="12sp"
-                android:textColor="@color/textDark"
-                android:layout_marginBottom="8dp"/>
-
+            <!-- Connection Row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_v7rc_row"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:layout_marginBottom="8dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="通道1分配:"
+                    android:text="连结方式"
+                    style="@style/V7RCTextLabel"/>
+
+                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+
+                <RadioGroup
+                    android:id="@+id/rg_connection_type"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+                    <RadioButton android:id="@+id/rb_bluetooth" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="蓝牙" android:textColor="@color/white" android:buttonTint="@color/v7rc_yellow"/>
+                    <RadioButton android:id="@+id/rb_wifi" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WIFI" android:textColor="@color/white" android:buttonTint="@color/v7rc_yellow"/>
+                </RadioGroup>
+            </LinearLayout>
+
+            <!-- IP/Port/Save Row -->
+            <LinearLayout
+                android:id="@+id/wifi_settings_layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_v7rc_row"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="IP"
+                    style="@style/V7RCTextLabel"/>
+
+                <EditText
+                    android:id="@+id/et_wifi_ip"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="192.168.4.1"
+                    style="@style/V7RCEditText"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:text="Port"
+                    style="@style/V7RCTextLabel"/>
+
+                <EditText
+                    android:id="@+id/et_wifi_port"
+                    android:layout_width="60dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="2000"
+                    style="@style/V7RCEditText"/>
+
+                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+
+                <Button
+                    android:id="@+id/btn_save_config"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="储存"
+                    style="@style/V7RCYellowButton"/>
+            </LinearLayout>
+
+            <!-- Device Connect Status Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_v7rc_row"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="12dp"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="连结装置"
+                    style="@style/V7RCTextLabel"/>
+
+                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+
+                <TextView
+                    android:id="@+id/tv_bluetooth_device"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="未选择装置"
+                    android:textColor="@color/v7rc_yellow"
                     android:textSize="14sp"/>
+            </LinearLayout>
 
-                <Spinner
-                    android:id="@+id/spinner_mixed_ch1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:entries="@array/channel_options"/>
+            <!-- Control Mode Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_v7rc_row"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:padding="8dp"
+                android:layout_marginBottom="8dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="通道2分配:"
-                    android:textSize="14sp"
-                    android:layout_marginStart="16dp"/>
+                    android:text="控制介面"
+                    style="@style/V7RCTextLabel"/>
 
-                <Spinner
-                    android:id="@+id/spinner_mixed_ch2"
+                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
+
+                <RadioGroup
+                    android:id="@+id/rg_control_mode"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="8dp"
-                    android:entries="@array/channel_options"/>
+                    android:orientation="horizontal">
+                    <RadioButton android:id="@+id/rb_separate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="独立模式" android:textColor="@color/white" android:buttonTint="@color/v7rc_yellow"/>
+                    <RadioButton android:id="@+id/rb_mixed" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="混控模式" android:textColor="@color/white" android:buttonTint="@color/v7rc_yellow"/>
+                </RadioGroup>
             </LinearLayout>
-        </LinearLayout>
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="说明：\n1. 独立模式：左摇杆Y轴控制电机1，右摇杆Y轴控制电机2。\n2. 混控模式：自动计算差速逻辑，适用于坦克或差速车。\n3. SS2协议：发送 SS2:CH1,CH2 格式，中性点 1500。"
-            android:textSize="12sp"
-            android:textColor="#666666"
-            android:layout_marginBottom="16dp"
-            android:padding="8dp"
-            android:background="#F0F0F0"/>
-
-        <!-- Wi-Fi Settings -->
-        <LinearLayout
-            android:id="@+id/wifi_settings_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="visible">
-
-            <EditText
-                android:id="@+id/et_wifi_ip"
+            <!-- Mixed Channel Select Row -->
+            <LinearLayout
+                android:id="@+id/mixed_channels_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/ip_address"
-                android:inputType="text"
-                android:layout_marginBottom="8dp"/>
+                android:background="@drawable/bg_v7rc_row"
+                android:orientation="vertical"
+                android:padding="8dp"
+                android:layout_marginBottom="8dp">
 
-            <EditText
-                android:id="@+id/et_wifi_port"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/port"
-                android:inputType="number"
-                android:layout_marginBottom="8dp"/>
-        </LinearLayout>
-
-        <!-- Bluetooth Settings -->
-        <LinearLayout
-            android:id="@+id/bluetooth_settings_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <Button
-                android:id="@+id/btn_scan_bluetooth"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="扫描蓝牙设备"/>
-
-            <TextView
-                android:id="@+id/tv_bluetooth_device"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="已选择设备: 无"
-                android:layout_marginTop="8dp"/>
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/lightGray"
-            android:layout_marginTop="16dp"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Control Settings -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="控制设置"
-            android:textSize="18sp"
-            android:textColor="@color/textDark"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="控制模式:"
-                android:textSize="14sp"/>
-
-            <RadioGroup
-                android:id="@+id/rg_control_mode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginStart="8dp">
-
-                <RadioButton
-                    android:id="@+id/rb_mixed"
+                <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="混控模式"/>
+                    android:text="油门混控通道选择"
+                    style="@style/V7RCTextLabel"
+                    android:layout_marginBottom="8dp"/>
 
-                <RadioButton
-                    android:id="@+id/rb_separate"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="独立模式"/>
-            </RadioGroup>
-        </LinearLayout>
+                    android:orientation="horizontal">
 
-        <EditText
-            android:id="@+id/et_throttle_template"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="油门指令模板 (使用 {value})"
-            android:layout_marginBottom="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CH1" style="@style/V7RCTextLabel"/>
+                    <Spinner android:id="@+id/spinner_mixed_ch1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:backgroundTint="@color/v7rc_yellow" android:entries="@array/mixed_source_options"/>
 
-        <EditText
-            android:id="@+id/et_steering_template"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="转向指令模板 (使用 {value})"
-            android:layout_marginBottom="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CH2" style="@style/V7RCTextLabel" android:layout_marginStart="16dp"/>
+                    <Spinner android:id="@+id/spinner_mixed_ch2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:backgroundTint="@color/v7rc_yellow" android:entries="@array/mixed_source_options"/>
+                </LinearLayout>
+            </LinearLayout>
 
-        <EditText
-            android:id="@+id/et_servo_left"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="舵机左指令"
-            android:layout_marginBottom="8dp"/>
-
-        <EditText
-            android:id="@+id/et_servo_center"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="舵机中指令"
-            android:layout_marginBottom="8dp"/>
-
-        <EditText
-            android:id="@+id/et_servo_right"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="舵机右指令"
-            android:layout_marginBottom="16dp"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/lightGray"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Custom Switches -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="自定义开关"
-            android:textSize="18sp"
-            android:textColor="@color/textDark"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Switch 1 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="8dp"
-            android:padding="8dp"
-            android:background="@color/white">
-
-            <EditText
-                android:id="@+id/et_switch1_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="开关1名称"
-                android:layout_marginBottom="4dp"/>
-
+            <!-- Other Settings -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:background="@drawable/bg_v7rc_row"
+                android:orientation="vertical"
+                android:padding="8dp">
 
-                <EditText
-                    android:id="@+id/et_switch1_on"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="开指令"
-                    android:layout_marginEnd="4dp"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="其他参数" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
 
-                <EditText
-                    android:id="@+id/et_switch1_off"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="关指令"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:layout_marginBottom="4dp">
+                    <TextView android:layout_width="80dp" android:layout_height="wrap_content" android:text="油门模板" style="@style/V7RCTextLabel"/>
+                    <EditText android:id="@+id/et_throttle_template" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/V7RCEditText" android:text="{value}"/>
+                </LinearLayout>
+
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
+                    <TextView android:layout_width="80dp" android:layout_height="wrap_content" android:text="转向模板" style="@style/V7RCTextLabel"/>
+                    <EditText android:id="@+id/et_steering_template" android:layout_width="match_parent" android:layout_height="wrap_content" style="@style/V7RCEditText" android:text="{value}"/>
+                </LinearLayout>
             </LinearLayout>
+
         </LinearLayout>
+    </ScrollView>
 
-        <!-- Switch 2 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="8dp"
-            android:padding="8dp"
-            android:background="@color/white">
+    <!-- Scanning Bluetooth Button (Floating or row) -->
+    <Button
+        android:id="@+id/btn_scan_bluetooth"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="扫描蓝牙"
+        style="@style/V7RCYellowButton"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_margin="16dp"/>
 
-            <EditText
-                android:id="@+id/et_switch2_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="开关2名称"
-                android:layout_marginBottom="4dp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/et_switch2_on"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="开指令"
-                    android:layout_marginEnd="4dp"/>
-
-                <EditText
-                    android:id="@+id/et_switch2_off"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="关指令"/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Switch 3 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="8dp"
-            android:padding="8dp"
-            android:background="@color/white">
-
-            <EditText
-                android:id="@+id/et_switch3_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="开关3名称"
-                android:layout_marginBottom="4dp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/et_switch3_on"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="开指令"
-                    android:layout_marginEnd="4dp"/>
-
-                <EditText
-                    android:id="@+id/et_switch3_off"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="关指令"/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Switch 4 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginBottom="16dp"
-            android:padding="8dp"
-            android:background="@color/white">
-
-            <EditText
-                android:id="@+id/et_switch4_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="开关4名称"
-                android:layout_marginBottom="4dp"/>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/et_switch4_on"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="开指令"
-                    android:layout_marginEnd="4dp"/>
-
-                <EditText
-                    android:id="@+id/et_switch4_off"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:hint="关指令"/>
-            </LinearLayout>
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/lightGray"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Gyro Settings -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="陀螺仪设置"
-            android:textSize="18sp"
-            android:textColor="@color/textDark"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp"/>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="灵敏度:"
-                android:textSize="14sp"/>
-
-            <SeekBar
-                android:id="@+id/seekbar_gyro_sensitivity"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:max="20"
-                android:progress="10"
-                android:layout_marginStart="8dp"/>
-
-            <TextView
-                android:id="@+id/tv_sensitivity_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="1.0"
-                android:textSize="14sp"
-                android:layout_marginStart="8dp"/>
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@color/lightGray"
-            android:layout_marginBottom="16dp"/>
-
-        <!-- Save Buttons -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center">
-
-            <Button
-                android:id="@+id/btn_save"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/save"
-                android:layout_marginEnd="8dp"
-                style="@style/Widget.MaterialComponents.Button"/>
-
-            <Button
-                android:id="@+id/btn_connect"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/connect"
-                android:layout_marginEnd="8dp"
-                style="@style/Widget.MaterialComponents.Button"/>
-
-            <Button
-                android:id="@+id/btn_disconnect"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/disconnect"
-                style="@style/Widget.MaterialComponents.Button"/>
-        </LinearLayout>
-    </LinearLayout>
-</ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

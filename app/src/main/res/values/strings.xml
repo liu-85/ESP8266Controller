@@ -27,8 +27,9 @@
     <string name="connected">已连接</string>
     <string name="disconnected">未连接</string>
     <string name="connecting">正在连接...</string>
-    <string-array name="channel_options">
-        <item>通道1</item>
-        <item>通道2</item>
+    <string-array name="mixed_source_options">
+        <item>油门 (Throttle)</item>
+        <item>转向 (Steering)</item>
+        <item>无 (中性 1500)</item>
     </string-array>
 </resources>
