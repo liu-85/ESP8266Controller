@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ESP8266遥控器</string>
+    <string name="connection_status">连接状态</string>
+    <string name="wifi">Wi-Fi</string>
+    <string name="bluetooth">蓝牙</string>
+    <string name="connect">连接</string>
+    <string name="disconnect">断开</string>
+    <string name="settings">设置</string>
+    <string name="throttle">油门</string>
+    <string name="steering">转向</string>
+    <string name="servo_left">左转</string>
+    <string name="servo_center">回中</string>
+    <string name="servo_right">右转</string>
+    <string name="gyro_mode">陀螺仪模式</string>
+    <string name="joystick_mode">摇杆模式</string>
+    <string name="calibrate">校准</string>
+    <string name="ip_address">IP地址</string>
+    <string name="port">端口</string>
+    <string name="device_name">设备名称</string>
+    <string name="command_template">指令模板</string>
+    <string name="on_command">开指令</string>
+    <string name="off_command">关指令</string>
+    <string name="save">保存</string>
+    <string name="export_config">导出配置</string>
+    <string name="import_config">导入配置</string>
+    <string name="connected">已连接</string>
+    <string name="disconnected">未连接</string>
+    <string name="connecting">正在连接...</string>
+</resources>

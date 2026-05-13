@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/backgroundGray">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <!-- Connection Settings -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="连接设置"
+            android:textSize="18sp"
+            android:textColor="@color/textDark"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="连接方式:"
+                android:textSize="14sp"/>
+
+            <RadioGroup
+                android:id="@+id/rg_connection_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginStart="8dp">
+
+                <RadioButton
+                    android:id="@+id/rb_wifi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/wifi"/>
+
+                <RadioButton
+                    android:id="@+id/rb_bluetooth"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/bluetooth"/>
+            </RadioGroup>
+        </LinearLayout>
+
+        <!-- Wi-Fi Settings -->
+        <LinearLayout
+            android:id="@+id/wifi_settings_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <EditText
+                android:id="@+id/et_wifi_ip"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/ip_address"
+                android:inputType="text"
+                android:layout_marginBottom="8dp"/>
+
+            <EditText
+                android:id="@+id/et_wifi_port"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/port"
+                android:inputType="number"
+                android:layout_marginBottom="8dp"/>
+        </LinearLayout>
+
+        <!-- Bluetooth Settings -->
+        <LinearLayout
+            android:id="@+id/bluetooth_settings_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <Button
+                android:id="@+id/btn_scan_bluetooth"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="扫描蓝牙设备"/>
+
+            <TextView
+                android:id="@+id/tv_bluetooth_device"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="已选择设备: 无"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightGray"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Control Settings -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="控制设置"
+            android:textSize="18sp"
+            android:textColor="@color/textDark"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <EditText
+            android:id="@+id/et_throttle_template"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="油门指令模板 (使用 {value})"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/et_steering_template"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="转向指令模板 (使用 {value})"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/et_servo_left"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="舵机左指令"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/et_servo_center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="舵机中指令"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/et_servo_right"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="舵机右指令"
+            android:layout_marginBottom="16dp"/>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightGray"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Custom Switches -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="自定义开关"
+            android:textSize="18sp"
+            android:textColor="@color/textDark"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Switch 1 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="8dp"
+            android:padding="8dp"
+            android:background="@color/white">
+
+            <EditText
+                android:id="@+id/et_switch1_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="开关1名称"
+                android:layout_marginBottom="4dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/et_switch1_on"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="开指令"
+                    android:layout_marginEnd="4dp"/>
+
+                <EditText
+                    android:id="@+id/et_switch1_off"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="关指令"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Switch 2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="8dp"
+            android:padding="8dp"
+            android:background="@color/white">
+
+            <EditText
+                android:id="@+id/et_switch2_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="开关2名称"
+                android:layout_marginBottom="4dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/et_switch2_on"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="开指令"
+                    android:layout_marginEnd="4dp"/>
+
+                <EditText
+                    android:id="@+id/et_switch2_off"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="关指令"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Switch 3 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="8dp"
+            android:padding="8dp"
+            android:background="@color/white">
+
+            <EditText
+                android:id="@+id/et_switch3_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="开关3名称"
+                android:layout_marginBottom="4dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/et_switch3_on"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="开指令"
+                    android:layout_marginEnd="4dp"/>
+
+                <EditText
+                    android:id="@+id/et_switch3_off"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="关指令"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Switch 4 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginBottom="16dp"
+            android:padding="8dp"
+            android:background="@color/white">
+
+            <EditText
+                android:id="@+id/et_switch4_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="开关4名称"
+                android:layout_marginBottom="4dp"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/et_switch4_on"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="开指令"
+                    android:layout_marginEnd="4dp"/>
+
+                <EditText
+                    android:id="@+id/et_switch4_off"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="关指令"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightGray"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Gyro Settings -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="陀螺仪设置"
+            android:textSize="18sp"
+            android:textColor="@color/textDark"
+            android:textStyle="bold"
+            android:layout_marginBottom="16dp"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="灵敏度:"
+                android:textSize="14sp"/>
+
+            <SeekBar
+                android:id="@+id/seekbar_gyro_sensitivity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:max="20"
+                android:progress="10"
+                android:layout_marginStart="8dp"/>
+
+            <TextView
+                android:id="@+id/tv_sensitivity_value"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1.0"
+                android:textSize="14sp"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@color/lightGray"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Save Buttons -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btn_save"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/save"
+                android:layout_marginEnd="8dp"
+                style="@style/Widget.MaterialComponents.Button"/>
+
+            <Button
+                android:id="@+id/btn_connect"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/connect"
+                android:layout_marginEnd="8dp"
+                style="@style/Widget.MaterialComponents.Button"/>
+
+            <Button
+                android:id="@+id/btn_disconnect"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/disconnect"
+                style="@style/Widget.MaterialComponents.Button"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
