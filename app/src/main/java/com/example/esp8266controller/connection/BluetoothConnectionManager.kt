@@ -1,9 +1,13 @@
 package com.example.esp8266controller.connection
 
+import android.Manifest
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.core.content.ContextCompat
 import com.example.esp8266controller.model.ConnectionType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -30,9 +34,25 @@ class BluetoothConnectionManager(
         private val SPP_UUID: UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB")
     }
 
+    private fun checkBluetoothPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            true
+        }
+    }
+
     override suspend fun connect(): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             _connectionState = ConnectionState.Connecting
+
+            if (!checkBluetoothPermission()) {
+                _connectionState = ConnectionState.Error("缺少蓝牙连接权限")
+                return@withContext Result.failure(SecurityException("缺少蓝牙连接权限"))
+            }
 
             val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             val bluetoothAdapter = bluetoothManager.adapter
