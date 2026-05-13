@@ -17,15 +17,28 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
         steeringAngle: Double,
         steeringStrength: Float
     ): ChannelData {
+        // 转向始终由右摇杆 X 轴控制 (Horizontal)
+        val steeringValue = mapToChannelValue(steeringAngle, steeringStrength, isVertical = false)
+        
+        // 油门始终由左摇杆 Y 轴控制 (Vertical)
+        val throttleValue = mapToChannelValue(throttleAngle, throttleStrength, isVertical = true)
+
         return if (controlConfig.controlMode == ControlMode.MIXED) {
-            val throttle = mapToChannelValue(throttleAngle, throttleStrength, isVertical = true)
-            val steering = mapToChannelValue(steeringAngle, steeringStrength, isVertical = false)
-            ChannelData(throttle, steering)
+            // 混控模式：油门控制多个通道，通常是左右差速混控
+            // 这里遵循标准差速算法: CH1 = Throttle + Steering, CH2 = Throttle - Steering
+            // 但用户提到“转向不变”，这通常意味着物理转向机构在 CH2，
+            // 如果是差速混控，转向逻辑会影响两路输出。
+            
+            val throttleOffset = throttleValue - controlConfig.centerValue
+            val steeringOffset = steeringValue - controlConfig.centerValue
+            
+            val mixed1 = (controlConfig.centerValue + throttleOffset + steeringOffset).coerceIn(controlConfig.minChannelValue, controlConfig.maxChannelValue)
+            val mixed2 = (controlConfig.centerValue + throttleOffset - steeringOffset).coerceIn(controlConfig.minChannelValue, controlConfig.maxChannelValue)
+            
+            ChannelData(mixed1, mixed2)
         } else {
-            // SEPARATE 模式: 左摇杆 Y 轴控制 M1, 右摇杆 Y 轴控制 M2
-            val m1 = mapToChannelValue(throttleAngle, throttleStrength, isVertical = true)
-            val m2 = mapToChannelValue(steeringAngle, steeringStrength, isVertical = true)
-            ChannelData(m1, m2)
+            // 独立模式：左 Y 控制 CH1 (油门)，右 X 控制 CH2 (转向)
+            ChannelData(throttleValue, steeringValue)
         }
     }
 

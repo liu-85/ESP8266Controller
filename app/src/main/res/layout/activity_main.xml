@@ -5,252 +5,286 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/backgroundGray"
+    android:background="@color/v7rc_bg"
     tools:context=".ui.MainActivity">
 
+    <!-- Grid Background Decoration (Optional, simplified) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:alpha="0.1"
+        android:background="@drawable/button_selector" />
+
     <!-- Top Status Bar -->
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:background="@color/colorPrimary"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="#33000000"
+        app:layout_constraintTop_toTopOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+        <ImageButton
+            android:id="@+id/btn_settings_top"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_manage"
+            android:tint="@color/colorAccent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-            <TextView
-                android:id="@+id/tv_connection_status"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/disconnected"
-                android:textColor="@color/white"
-                android:textSize="16sp"
-                android:gravity="start"/>
-
-            <TextView
-                android:id="@+id/tv_mode_status"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/joystick_mode"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                android:layout_marginEnd="16dp"/>
-
-            <Button
-                android:id="@+id/btn_settings"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="@string/settings"
-                android:textColor="@color/white"
-                android:backgroundTint="@color/colorPrimaryDark"
-                style="@style/Widget.MaterialComponents.Button"/>
-        </LinearLayout>
-    </androidx.appcompat.widget.Toolbar>
-
-    <!-- Left Joystick (Throttle) -->
-    <LinearLayout
-        android:id="@+id/left_joystick_layout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toTopOf="@id/control_buttons_layout"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/middle_controls"
-        app:layout_constraintWidth_percent="0.35">
+        <ImageButton
+            android:id="@+id/btn_channels_top"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginStart="8dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_sort_by_size"
+            android:tint="@color/colorAccent"
+            app:layout_constraintStart_toEndOf="@id/btn_settings_top"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
+            android:id="@+id/tv_connection_status_v7"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/throttle"
-            android:textSize="18sp"
-            android:textColor="@color/textDark"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginStart="16dp"
+            android:text="已连接"
+            android:textColor="@color/white"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@id/btn_channels_top"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <com.example.esp8266controller.joystick.JoystickView
-            android:id="@+id/left_joystick"
-            android:layout_width="160dp"
-            android:layout_height="160dp"/>
-    </LinearLayout>
+        <TextView
+            android:id="@+id/tv_device_info_v7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="装置：xiaomi"
+            android:textColor="@color/v7rc_accent_right"
+            android:textSize="12sp"
+            app:layout_constraintStart_toEndOf="@id/tv_connection_status_v7"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-    <!-- Middle Controls -->
-    <LinearLayout
-        android:id="@+id/middle_controls"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:gravity="center"
-        android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toTopOf="@id/control_buttons_layout"
-        app:layout_constraintStart_toEndOf="@id/left_joystick_layout"
-        app:layout_constraintEnd_toStartOf="@id/right_joystick_layout">
+        <TextView
+            android:id="@+id/tv_connect_type_v7"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:text="连结方式：WIFI"
+            android:textColor="@color/v7rc_accent_right"
+            android:textSize="12sp"
+            app:layout_constraintEnd_toStartOf="@id/btn_record_top"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <!-- Mode Switch -->
+        <ImageButton
+            android:id="@+id/btn_record_top"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@android:drawable/ic_menu_camera"
+            android:tint="@color/colorAccent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Left Gauge & Joystick -->
+    <FrameLayout
+        android:id="@+id/left_gauge_container"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_marginStart="32dp"
+        app:layout_constraintTop_toBottomOf="@id/top_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_gauge" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:background="@drawable/gauge_ticks" />
+
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="控制模式"
-                android:textSize="16sp"
-                android:textColor="@color/textDark"/>
-
-            <androidx.appcompat.widget.SwitchCompat
-                android:id="@+id/switch_gyro_mode"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textOff="@string/joystick_mode"
-                android:textOn="@string/gyro_mode"
-                android:checked="false"
-                android:layout_marginTop="8dp"/>
-
-            <Button
-                android:id="@+id/btn_calibrate"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="@string/calibrate"
-                android:textColor="@color/textLight"
-                android:backgroundTint="@color/colorPrimaryDark"
-                android:visibility="gone"
-                style="@style/Widget.MaterialComponents.Button"
-                android:layout_marginTop="8dp"/>
-        </LinearLayout>
-
-        <!-- Servo Controls -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:orientation="vertical"
             android:gravity="center">
 
             <TextView
+                android:id="@+id/tv_left_val_large"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="舵机控制"
-                android:textSize="16sp"
-                android:textColor="@color/textDark"
-                android:layout_marginBottom="8dp"/>
+                android:text="0"
+                android:textColor="@color/v7rc_accent_left"
+                android:textSize="48sp"
+                android:textStyle="bold"/>
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/tv_left_val_raw"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <Button
-                    android:id="@+id/btn_servo_left"
-                    android:layout_width="80dp"
-                    android:layout_height="48dp"
-                    android:text="@string/servo_left"
-                    style="@style/ControlButton"
-                    android:layout_marginEnd="4dp"/>
-
-                <Button
-                    android:id="@+id/btn_servo_center"
-                    android:layout_width="80dp"
-                    android:layout_height="48dp"
-                    android:text="@string/servo_center"
-                    style="@style/ControlButton"
-                    android:layout_marginEnd="4dp"/>
-
-                <Button
-                    android:id="@+id/btn_servo_right"
-                    android:layout_width="80dp"
-                    android:layout_height="48dp"
-                    android:text="@string/servo_right"
-                    style="@style/ControlButton"/>
-            </LinearLayout>
+                android:text="1500"
+                android:textColor="@color/v7rc_text_value"
+                android:textSize="24sp"/>
         </LinearLayout>
-    </LinearLayout>
 
-    <!-- Right Joystick (Steering) -->
+        <com.example.esp8266controller.joystick.JoystickView
+            android:id="@+id/left_joystick"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.4" />
+    </FrameLayout>
+
+    <!-- Right Gauge & Joystick -->
+    <FrameLayout
+        android:id="@+id/right_gauge_container"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_marginEnd="32dp"
+        app:layout_constraintTop_toBottomOf="@id/top_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/bg_gauge" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:background="@drawable/gauge_ticks" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/tv_right_val_large"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="0"
+                android:textColor="@color/v7rc_accent_right"
+                android:textSize="48sp"
+                android:textStyle="bold"/>
+
+            <TextView
+                android:id="@+id/tv_right_val_raw"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1500"
+                android:textColor="@color/v7rc_text_value"
+                android:textSize="24sp"/>
+        </LinearLayout>
+
+        <com.example.esp8266controller.joystick.JoystickView
+            android:id="@+id/right_joystick"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:alpha="0.4" />
+    </FrameLayout>
+
+    <!-- Center Logo / Info Area -->
     <LinearLayout
-        android:id="@+id/right_joystick_layout"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:id="@+id/center_info"
+        android:layout_width="160dp"
+        android:layout_height="160dp"
+        android:background="@drawable/bg_gauge"
         android:orientation="vertical"
         android:gravity="center"
-        android:layout_margin="16dp"
-        app:layout_constraintTop_toBottomOf="@id/toolbar"
-        app:layout_constraintBottom_toTopOf="@id/control_buttons_layout"
-        app:layout_constraintStart_toEndOf="@id/middle_controls"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintWidth_percent="0.35">
+        app:layout_constraintTop_toBottomOf="@id/top_bar"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/left_gauge_container"
+        app:layout_constraintEnd_toStartOf="@id/right_gauge_container">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/steering"
-            android:textSize="18sp"
-            android:textColor="@color/textDark"
-            android:layout_marginBottom="8dp"/>
+            android:text="RC遥控器"
+            android:textColor="@color/v7rc_accent_right"
+            android:textSize="20sp"
+            android:textStyle="bold"/>
 
-        <com.example.esp8266controller.joystick.JoystickView
-            android:id="@+id/right_joystick"
-            android:layout_width="160dp"
-            android:layout_height="160dp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TURBO"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            android:textStyle="italic"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1.0.0"
+            android:textColor="@color/v7rc_text_value"
+            android:textSize="12sp"/>
     </LinearLayout>
 
-    <!-- Bottom Control Buttons (Custom Switches) -->
+    <!-- Bottom Center Buttons (Servo Controls) -->
     <LinearLayout
-        android:id="@+id/control_buttons_layout"
-        android:layout_width="0dp"
+        android:id="@+id/bottom_controls"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_margin="8dp"
+        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
-        <Button
-            android:id="@+id/btn_switch_1"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:text="灯光"
-            android:layout_marginEnd="4dp"
-            style="@style/ControlButton"/>
+        <ImageButton
+            android:id="@+id/btn_servo_left_v7"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_gauge"
+            android:src="@android:drawable/ic_media_previous"
+            android:tint="@color/colorAccent" />
 
-        <Button
-            android:id="@+id/btn_switch_2"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:text="蜂鸣器"
-            android:layout_marginEnd="4dp"
-            style="@style/ControlButton"/>
+        <ImageButton
+            android:id="@+id/btn_servo_center_v7"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_gauge"
+            android:src="@android:drawable/ic_media_play"
+            android:tint="@color/v7rc_accent_left" />
 
-        <Button
-            android:id="@+id/btn_switch_3"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:text="开关3"
-            android:layout_marginEnd="4dp"
-            style="@style/ControlButton"/>
-
-        <Button
-            android:id="@+id/btn_switch_4"
-            android:layout_width="0dp"
-            android:layout_height="48dp"
-            android:layout_weight="1"
-            android:text="开关4"
-            style="@style/ControlButton"/>
+        <ImageButton
+            android:id="@+id/btn_servo_right_v7"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/bg_gauge"
+            android:src="@android:drawable/ic_media_next"
+            android:tint="@color/v7rc_accent_right" />
     </LinearLayout>
+
+    <!-- Invisible elements to maintain compatibility with existing code -->
+    <androidx.appcompat.widget.Toolbar android:id="@+id/toolbar" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <TextView android:id="@+id/tv_connection_status" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <TextView android:id="@+id/tv_mode_status" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <Button android:id="@+id/btn_settings" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch_gyro_mode" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <Button android:id="@+id/btn_calibrate" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <Button android:id="@+id/btn_servo_left" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <Button android:id="@+id/btn_servo_center" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <Button android:id="@+id/btn_servo_right" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <Button android:id="@+id/btn_switch_1" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <Button android:id="@+id/btn_switch_2" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <Button android:id="@+id/btn_switch_3" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <Button android:id="@+id/btn_switch_4" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

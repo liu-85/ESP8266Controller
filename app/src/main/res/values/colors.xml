@@ -1,15 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#2196F3</color>
-    <color name="colorPrimaryDark">#1976D2</color>
-    <color name="colorAccent">#FF5722</color>
+    <color name="colorPrimary">#333333</color>
+    <color name="colorPrimaryDark">#1A1A1A</color>
+    <color name="colorAccent">#FFA500</color>
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
     <color name="gray">#757575</color>
+    <color name="v7rc_bg">#2C2C2C</color>
+    <color name="v7rc_gauge">#3D3D3D</color>
+    <color name="v7rc_accent_left">#4FC3F7</color>
+    <color name="v7rc_accent_right">#FFF176</color>
+    <color name="v7rc_text_value">#BDBDBD</color>
     <color name="lightGray">#E0E0E0</color>
-    <color name="backgroundGray">#FAFAFA</color>
-    <color name="buttonInactive">#FFFFFF</color>
-    <color name="buttonActive">#2196F3</color>
-    <color name="textDark">#212121</color>
+    <color name="backgroundGray">#2C2C2C</color>
+    <color name="buttonInactive">#444444</color>
+    <color name="buttonActive">#FFA500</color>
+    <color name="textDark">#E0E0E0</color>
     <color name="textLight">#FFFFFF</color>
 </resources>

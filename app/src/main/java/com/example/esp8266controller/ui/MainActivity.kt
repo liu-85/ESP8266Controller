@@ -3,6 +3,7 @@ package com.example.esp8266controller.ui
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -36,6 +37,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnSwitch3: Button
     private lateinit var btnSwitch4: Button
     private lateinit var btnSettings: Button
+
+    // V7 Style UI Elements
+    private lateinit var tvLeftValLarge: TextView
+    private lateinit var tvLeftValRaw: TextView
+    private lateinit var tvRightValLarge: TextView
+    private lateinit var tvRightValRaw: TextView
+    private lateinit var tvConnectionStatusV7: TextView
+    private lateinit var tvDeviceInfoV7: TextView
+    private lateinit var tvConnectTypeV7: TextView
+    private lateinit var btnSettingsTop: ImageButton
+    private lateinit var btnChannelsTop: ImageButton
+    private lateinit var btnServoLeftV7: ImageButton
+    private lateinit var btnServoCenterV7: ImageButton
+    private lateinit var btnServoRightV7: ImageButton
 
     private var connectionManager: ConnectionManager? = null
     private var appConfig: AppConfig? = null
@@ -88,7 +103,34 @@ class MainActivity : AppCompatActivity() {
         btnSwitch4 = findViewById<Button>(R.id.btn_switch_4)
         btnSettings = findViewById<Button>(R.id.btn_settings)
 
+        // V7 UI Bindings
+        tvLeftValLarge = findViewById(R.id.tv_left_val_large)
+        tvLeftValRaw = findViewById(R.id.tv_left_val_raw)
+        tvRightValLarge = findViewById(R.id.tv_right_val_large)
+        tvRightValRaw = findViewById(R.id.tv_right_val_raw)
+        tvConnectionStatusV7 = findViewById(R.id.tv_connection_status_v7)
+        tvDeviceInfoV7 = findViewById(R.id.tv_device_info_v7)
+        tvConnectTypeV7 = findViewById(R.id.tv_connect_type_v7)
+        btnSettingsTop = findViewById(R.id.btn_settings_top)
+        btnChannelsTop = findViewById(R.id.btn_channels_top)
+        btnServoLeftV7 = findViewById(R.id.btn_servo_left_v7)
+        btnServoCenterV7 = findViewById(R.id.btn_servo_center_v7)
+        btnServoRightV7 = findViewById(R.id.btn_servo_right_v7)
+
         updateCustomSwitches()
+        updateV7Status()
+    }
+
+    private fun updateV7Status() {
+        tvDeviceInfoV7.text = "装置：${appConfig?.connectionConfig?.wifiIp ?: "未知"}"
+        tvConnectTypeV7.text = "连结方式：${appConfig?.connectionConfig?.connectionType?.name ?: "WIFI"}"
+        
+        val statusText = when (connectionManager?.connectionState) {
+            is ConnectionState.Connected -> "已连线"
+            is ConnectionState.Connecting -> "连线中..."
+            else -> "未连线"
+        }
+        tvConnectionStatusV7.text = statusText
     }
 
     private fun updateCustomSwitches() {
@@ -123,6 +165,15 @@ class MainActivity : AppCompatActivity() {
             startActivityForResult(Intent(this, SettingsActivity::class.java), SETTINGS_REQUEST_CODE)
         }
 
+        btnSettingsTop.setOnClickListener {
+            startActivityForResult(Intent(this, SettingsActivity::class.java), SETTINGS_REQUEST_CODE)
+        }
+
+        btnChannelsTop.setOnClickListener {
+            // TODO: Implement channel mapping UI or just open settings for now
+            startActivityForResult(Intent(this, SettingsActivity::class.java), SETTINGS_REQUEST_CODE)
+        }
+
         switchGyroMode.setOnCheckedChangeListener { _, isChecked ->
             isGyroEnabled = isChecked
             tvModeStatus.text = if (isChecked) getString(R.string.gyro_mode) else getString(R.string.joystick_mode)
@@ -151,9 +202,17 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupServoButtons() {
-        btnServoLeft.setOnClickListener { sendServoCommand(appConfig!!.controlConfig.servoLeftCommand) }
-        btnServoCenter.setOnClickListener { sendServoCommand(appConfig!!.controlConfig.servoCenterCommand) }
-        btnServoRight.setOnClickListener { sendServoCommand(appConfig!!.controlConfig.servoRightCommand) }
+        val onServoLeft = { sendServoCommand(appConfig!!.controlConfig.servoLeftCommand) }
+        val onServoCenter = { sendServoCommand(appConfig!!.controlConfig.servoCenterCommand) }
+        val onServoRight = { sendServoCommand(appConfig!!.controlConfig.servoRightCommand) }
+
+        btnServoLeft.setOnClickListener { onServoLeft() }
+        btnServoCenter.setOnClickListener { onServoCenter() }
+        btnServoRight.setOnClickListener { onServoRight() }
+
+        btnServoLeftV7.setOnClickListener { onServoLeft() }
+        btnServoCenterV7.setOnClickListener { onServoCenter() }
+        btnServoRightV7.setOnClickListener { onServoRight() }
     }
 
     private fun setupCustomSwitchButtons() {
@@ -244,6 +303,15 @@ class MainActivity : AppCompatActivity() {
                 
                 val command = dataProcessor?.formatCommand(throttle, steering)
                 command?.let { payload ->
+                    // 更新 UI 数值显示 (回到主线程)
+                    withContext(Dispatchers.Main) {
+                        tvLeftValRaw.text = throttle.toString()
+                        tvRightValRaw.text = steering.toString()
+                        tvLeftValLarge.text = (throttle - 1500).toString()
+                        tvRightValLarge.text = (steering - 1500).toString()
+                        updateV7Status()
+                    }
+
                     val sendResult = manager.sendData(payload)
                     if (sendResult.isFailure) {
                         val error = sendResult.exceptionOrNull()
