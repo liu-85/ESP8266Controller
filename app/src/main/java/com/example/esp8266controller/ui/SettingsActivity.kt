@@ -1,12 +1,14 @@
 package com.example.esp8266controller.ui
 
 import android.Manifest
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -32,8 +34,8 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var wifiSettingsLayout: LinearLayout
     private lateinit var etWifiIp: EditText
     private lateinit var etWifiPort: EditText
+    private lateinit var btnSaveConfig: Button
 
-    private lateinit var bluetoothSettingsLayout: LinearLayout
     private lateinit var btnScanBluetooth: Button
     private lateinit var tvBluetoothDevice: TextView
 
@@ -87,11 +89,19 @@ class SettingsActivity : AppCompatActivity() {
     private fun setupListeners() {
         btnBack.setOnClickListener { finish() }
 
+        rgConnectionType.setOnCheckedChangeListener { _, checkedId ->
+            wifiSettingsLayout.visibility = if (checkedId == R.id.rb_wifi) {
+                View.VISIBLE
+            } else {
+                View.GONE
+            }
+        }
+
         rgControlMode.setOnCheckedChangeListener { _, checkedId ->
             mixedChannelsLayout.visibility = if (checkedId == R.id.rb_mixed) {
-                android.view.View.VISIBLE
+                View.VISIBLE
             } else {
-                android.view.View.GONE
+                View.GONE
             }
         }
 
@@ -109,10 +119,10 @@ class SettingsActivity : AppCompatActivity() {
             // Connection
             if (config.connectionConfig.connectionType == ConnectionType.WIFI) {
                 rbWifi.isChecked = true
-                wifiSettingsLayout.visibility = android.view.View.VISIBLE
+                wifiSettingsLayout.visibility = View.VISIBLE
             } else {
                 rbBluetooth.isChecked = true
-                bluetoothSettingsLayout.visibility = android.view.View.VISIBLE
+                wifiSettingsLayout.visibility = View.GONE
             }
 
             etWifiIp.setText(config.connectionConfig.wifiIp)
@@ -120,10 +130,10 @@ class SettingsActivity : AppCompatActivity() {
 
             if (config.controlConfig.controlMode == ControlMode.MIXED) {
                 rbMixed.isChecked = true
-                mixedChannelsLayout.visibility = android.view.View.VISIBLE
+                mixedChannelsLayout.visibility = View.VISIBLE
             } else {
                 rbSeparate.isChecked = true
-                mixedChannelsLayout.visibility = android.view.View.GONE
+                mixedChannelsLayout.visibility = View.GONE
             }
 
             spinnerMixedCh1.setSelection(config.controlConfig.ch1Source.ordinal)
@@ -225,7 +235,7 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == BLUETOOTH_PERMISSION_REQUEST && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
             scanBluetoothDevices()

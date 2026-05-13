@@ -1,7 +1,9 @@
 package com.example.esp8266controller.ui
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
@@ -177,15 +179,15 @@ class MainActivity : AppCompatActivity() {
         switchGyroMode.setOnCheckedChangeListener { _, isChecked ->
             isGyroEnabled = isChecked
             tvModeStatus.text = if (isChecked) getString(R.string.gyro_mode) else getString(R.string.joystick_mode)
-            btnCalibrate.visibility = if (isChecked) android.view.View.VISIBLE else android.view.View.GONE
+            btnCalibrate.visibility = if (isChecked) View.VISIBLE else View.GONE
 
             if (isChecked) {
-                leftJoystick.visibility = android.view.View.INVISIBLE
-                rightJoystick.visibility = android.view.View.INVISIBLE
+                leftJoystick.visibility = View.INVISIBLE
+                rightJoystick.visibility = View.INVISIBLE
                 gyroController.start()
             } else {
-                leftJoystick.visibility = android.view.View.VISIBLE
-                rightJoystick.visibility = android.view.View.VISIBLE
+                leftJoystick.visibility = View.VISIBLE
+                rightJoystick.visibility = View.VISIBLE
                 gyroController.stop()
                 leftJoystick.reset()
                 rightJoystick.reset()

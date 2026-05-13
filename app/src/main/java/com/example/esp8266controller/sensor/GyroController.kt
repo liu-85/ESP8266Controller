@@ -10,6 +10,7 @@ import com.example.esp8266controller.joystick.JoystickDataProcessor
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.sqrt
+import kotlin.math.PI
 
 class GyroController(
     private val context: Context,
@@ -68,8 +69,8 @@ class GyroController(
                 val y = it.values[1]
                 val z = it.values[2]
 
-                lastPitch = atan2(y, sqrt(x * x + z * z)) * (180 / Math.PI).toFloat()
-                lastRoll = atan2(-x, z) * (180 / Math.PI).toFloat()
+                lastPitch = atan2(y.toDouble(), sqrt((x * x + z * z).toDouble())).toFloat() * (180 / PI).toFloat()
+                lastRoll = atan2((-x).toDouble(), z.toDouble()).toFloat() * (180 / PI).toFloat()
 
                 // Apply calibration offset
                 var adjustedPitch = lastPitch - zeroPointPitch

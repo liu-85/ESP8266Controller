@@ -98,13 +98,13 @@ class JoystickView @JvmOverloads constructor(
                 }
 
                 // Calculate angle (0° = top, 90° = right, 180° = bottom, 270° = left)
-                angle = atan2(innerCircleY - centerY, innerCircleX - centerX) * (180 / PI) + 90
+                angle = atan2((innerCircleY - centerY).toDouble(), (innerCircleX - centerX).toDouble()) * (180 / PI) + 90
                 if (angle < 0) angle += 360
 
                 // Calculate strength (0 = center, 1 = full)
                 val offsetDist = sqrt(
-                    (innerCircleX - centerX).toDouble().pow(2) +
-                        (innerCircleY - centerY).toDouble().pow(2)
+                    (innerCircleX - centerX).toDouble().pow(2.0) +
+                        (innerCircleY - centerY).toDouble().pow(2.0)
                 ).toFloat()
                 strength = offsetDist / maxDistance
 
