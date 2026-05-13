@@ -102,10 +102,11 @@ class JoystickView @JvmOverloads constructor(
                 if (angle < 0) angle += 360
 
                 // Calculate strength (0 = center, 1 = full)
-                strength = sqrt(
+                val offsetDist = sqrt(
                     (innerCircleX - centerX).toDouble().pow(2) +
-                    (innerCircleY - centerY).toDouble().pow(2)
-                ) / maxDistance.toFloat()
+                        (innerCircleY - centerY).toDouble().pow(2)
+                ).toFloat()
+                strength = offsetDist / maxDistance
 
                 onJoystickMoveListener?.invoke(angle, strength)
                 invalidate()
