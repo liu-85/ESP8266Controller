@@ -8,6 +8,7 @@ import com.example.esp8266controller.model.ConnectionType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
 import java.util.*
 
 class BluetoothConnectionManager(
@@ -52,7 +53,7 @@ class BluetoothConnectionManager(
             val newSocket = device.createRfcommSocketToServiceRecord(SPP_UUID)
             newSocket.connect()
             bluetoothSocket = newSocket
-            outputStream = OutputStreamWriter(newSocket.outputStream, Charsets.UTF_8)
+            outputStream = OutputStreamWriter(newSocket.outputStream, StandardCharsets.UTF_8)
 
             _connectionState = ConnectionState.Connected(deviceName)
             Result.success(Unit)

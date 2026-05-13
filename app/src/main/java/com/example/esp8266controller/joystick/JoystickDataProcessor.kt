@@ -23,9 +23,9 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
 
     private fun mapToChannelValue(angle: Double, strength: Float, isThrottle: Boolean): Int {
         val center = controlConfig.centerValue
-        val min = controlConfig.minChannelValue
-        val max = controlConfig.maxChannelValue
-        val range = (max - min) / 2
+        val minVal = controlConfig.minChannelValue
+        val maxVal = controlConfig.maxChannelValue
+        val range = (maxVal - minVal) / 2
 
         // For throttle: 0° (top) = forward, 180° (bottom) = backward
         // For steering: 90° (right) = right, 270° (left) = left

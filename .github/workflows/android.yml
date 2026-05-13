@@ -25,7 +25,14 @@ jobs:
       run: chmod +x ./gradlew
 
     - name: Build with Gradle
-      run: ./gradlew build --stacktrace
+      shell: bash
+      run: |
+        set -o pipefail
+        if ! ./gradlew build --stacktrace --console=plain 2>&1 | tee build.log; then
+          echo "---- Kotlin diagnostics (lines starting with e:) ----"
+          grep '^e:' build.log | head -n 60 || true
+          exit 1
+        fi
 
     - name: Run unit tests
       run: ./gradlew test --stacktrace

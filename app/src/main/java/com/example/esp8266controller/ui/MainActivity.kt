@@ -8,7 +8,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
 import androidx.appcompat.widget.Toolbar
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.lifecycleScope
 import com.example.esp8266controller.R
 import com.example.esp8266controller.connection.*
@@ -16,7 +15,6 @@ import com.example.esp8266controller.joystick.*
 import com.example.esp8266controller.model.*
 import com.example.esp8266controller.sensor.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -241,10 +239,16 @@ class MainActivity : AppCompatActivity() {
         connectionManager?.let { manager ->
             if (manager.connectionState is ConnectionState.Connected) {
                 val command = dataProcessor?.formatCommand(lastThrottleValue, lastSteeringValue)
-                command?.let {
-                    manager.sendData(it).onFailure { error ->
+                command?.let { payload ->
+                    val sendResult = manager.sendData(payload)
+                    if (sendResult.isFailure) {
+                        val error = sendResult.exceptionOrNull()
                         lifecycleScope.launch {
-                            Toast.makeText(this@MainActivity, "发送失败: ${error.message}", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(
+                                this@MainActivity,
+                                "发送失败: ${error?.message}",
+                                Toast.LENGTH_SHORT
+                            ).show()
                         }
                     }
                 }
@@ -254,16 +258,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendServoCommand(command: String) {
         lifecycleScope.launch {
-            connectionManager?.sendData("$command\n")?.onFailure { error ->
-                Toast.makeText(this@MainActivity, "发送失败: ${error.message}", Toast.LENGTH_SHORT).show()
+            val manager = connectionManager ?: return@launch
+            val sendResult = manager.sendData("$command\n")
+            if (sendResult.isFailure) {
+                val error = sendResult.exceptionOrNull()
+                Toast.makeText(this@MainActivity, "发送失败: ${error?.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun sendCustomCommand(command: String) {
         lifecycleScope.launch {
-            connectionManager?.sendData("$command\n")?.onFailure { error ->
-                Toast.makeText(this@MainActivity, "发送失败: ${error.message}", Toast.LENGTH_SHORT).show()
+            val manager = connectionManager ?: return@launch
+            val sendResult = manager.sendData("$command\n")
+            if (sendResult.isFailure) {
+                val error = sendResult.exceptionOrNull()
+                Toast.makeText(this@MainActivity, "发送失败: ${error?.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -274,11 +284,13 @@ class MainActivity : AppCompatActivity() {
             connectionManager = WifiConnectionManager(ip, port)
 
             tvConnectionStatus.text = getString(R.string.connecting)
-            connectionManager!!.connect().onSuccess {
+            val connectResult = connectionManager!!.connect()
+            if (connectResult.isSuccess) {
                 tvConnectionStatus.text = connectionManager!!.getConnectionInfo()
-            }.onFailure { error ->
+            } else {
                 tvConnectionStatus.text = getString(R.string.disconnected)
-                Toast.makeText(this@MainActivity, "连接失败: ${error.message}", Toast.LENGTH_SHORT).show()
+                val error = connectResult.exceptionOrNull()
+                Toast.makeText(this@MainActivity, "连接失败: ${error?.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -289,11 +301,13 @@ class MainActivity : AppCompatActivity() {
             connectionManager = BluetoothConnectionManager(this@MainActivity, deviceAddress)
 
             tvConnectionStatus.text = getString(R.string.connecting)
-            connectionManager!!.connect().onSuccess {
+            val connectResult = connectionManager!!.connect()
+            if (connectResult.isSuccess) {
                 tvConnectionStatus.text = connectionManager!!.getConnectionInfo()
-            }.onFailure { error ->
+            } else {
                 tvConnectionStatus.text = getString(R.string.disconnected)
-                Toast.makeText(this@MainActivity, "连接失败: ${error.message}", Toast.LENGTH_SHORT).show()
+                val error = connectResult.exceptionOrNull()
+                Toast.makeText(this@MainActivity, "连接失败: ${error?.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

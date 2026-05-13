@@ -254,7 +254,9 @@ class SettingsActivity : AppCompatActivity() {
         val pairedDevices = bluetoothAdapter.bondedDevices
 
         if (pairedDevices.isNotEmpty()) {
-            val deviceNames = pairedDevices.map { it.name ?: it.address }.toTypedArray()
+            val deviceNames = pairedDevices
+                .map { device -> device.name ?: device.address ?: "device" }
+                .toTypedArray()
             val devicesArray = pairedDevices.toList()
 
             android.app.AlertDialog.Builder(this)
