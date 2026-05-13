@@ -24,15 +24,14 @@ jobs:
     - name: Grant execute permission for gradlew
       run: chmod +x ./gradlew
 
-    - name: Build with Gradle
-      shell: bash
-      run: |
-        set -o pipefail
-        if ! ./gradlew build --stacktrace --console=plain 2>&1 | tee build.log; then
-          echo "---- Kotlin diagnostics (lines starting with e:) ----"
-          grep '^e:' build.log | head -n 60 || true
-          exit 1
-        fi
+    - name: Run tests and Lint
+      run: ./gradlew test lintDebug --stacktrace
 
-    - name: Run unit tests
-      run: ./gradlew test --stacktrace
+    - name: Build Debug APK
+      run: ./gradlew assembleDebug --stacktrace
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: esp8266-controller-debug
+        path: app/build/outputs/apk/debug/*.apk
