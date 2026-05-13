@@ -35,3 +35,20 @@ jobs:
       with:
         name: esp8266-controller-debug
         path: app/build/outputs/apk/debug/*.apk
+
+    - name: Create Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: softprops/action-gh-release@v2
+      with:
+        files: app/build/outputs/apk/debug/*.apk
+        tag_name: v${{ github.run_number }}
+        name: Release v${{ github.run_number }}
+        body: |
+          RC遥控器 最新构建版本
+          - 修复了 UI 遮挡问题
+          - 优化了 Wi-Fi 连接协议匹配 (SS2 协议)
+          - 增加了自动连接逻辑
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

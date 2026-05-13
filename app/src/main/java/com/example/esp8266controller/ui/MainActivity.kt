@@ -327,18 +327,16 @@ class MainActivity : AppCompatActivity() {
             gyroController.setSensitivity(appConfig!!.gyroSensitivity)
             dataProcessor = JoystickDataProcessor(appConfig!!.controlConfig)
 
-            // Reconnect with new settings if needed
-            if (connectionManager?.connectionState is ConnectionState.Connected) {
-                disconnect()
-                when (appConfig!!.connectionConfig.connectionType) {
-                    ConnectionType.WIFI -> connectToWifi(
-                        appConfig!!.connectionConfig.wifiIp,
-                        appConfig!!.connectionConfig.wifiPort
-                    )
-                    ConnectionType.BLUETOOTH -> connectToBluetooth(
-                        appConfig!!.connectionConfig.bluetoothAddress
-                    )
-                }
+            // Attempt to connect/reconnect with new settings
+            disconnect()
+            when (appConfig!!.connectionConfig.connectionType) {
+                ConnectionType.WIFI -> connectToWifi(
+                    appConfig!!.connectionConfig.wifiIp,
+                    appConfig!!.connectionConfig.wifiPort
+                )
+                ConnectionType.BLUETOOTH -> connectToBluetooth(
+                    appConfig!!.connectionConfig.bluetoothAddress
+                )
             }
         }
     }

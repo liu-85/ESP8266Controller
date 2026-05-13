@@ -25,6 +25,7 @@ class WifiConnectionManager(
             _connectionState = ConnectionState.Connecting
             val newSocket = Socket(ipAddress, port)
             newSocket.soTimeout = 5000
+            newSocket.tcpNoDelay = true // Disable Nagle's algorithm for lower latency
             socket = newSocket
             outputStream = OutputStreamWriter(newSocket.getOutputStream(), Charset.forName("UTF-8"))
             _connectionState = ConnectionState.Connected("$ipAddress:$port")
