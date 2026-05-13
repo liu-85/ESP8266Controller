@@ -7,6 +7,9 @@ import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import com.example.esp8266controller.model.ControlConfig
 import com.example.esp8266controller.joystick.JoystickDataProcessor
+import kotlin.math.abs
+import kotlin.math.atan2
+import kotlin.math.sqrt
 
 class GyroController(
     private val context: Context,
