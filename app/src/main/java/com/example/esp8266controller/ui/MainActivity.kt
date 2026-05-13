@@ -269,10 +269,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun connectToWifi(ip: String, port: Int) {
-        connectionManager?.disconnect()
-        connectionManager = WifiConnectionManager(ip, port)
-
         lifecycleScope.launch {
+            connectionManager?.disconnect()
+            connectionManager = WifiConnectionManager(ip, port)
+
             tvConnectionStatus.text = getString(R.string.connecting)
             connectionManager!!.connect().onSuccess {
                 tvConnectionStatus.text = connectionManager!!.getConnectionInfo()
@@ -284,10 +284,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun connectToBluetooth(deviceAddress: String) {
-        connectionManager?.disconnect()
-        connectionManager = BluetoothConnectionManager(this, deviceAddress)
-
         lifecycleScope.launch {
+            connectionManager?.disconnect()
+            connectionManager = BluetoothConnectionManager(this@MainActivity, deviceAddress)
+
             tvConnectionStatus.text = getString(R.string.connecting)
             connectionManager!!.connect().onSuccess {
                 tvConnectionStatus.text = connectionManager!!.getConnectionInfo()
@@ -333,7 +333,9 @@ class MainActivity : AppCompatActivity() {
         super.onDestroy()
         sendDataJob?.cancel()
         controlJob.cancel()
-        connectionManager?.disconnect()
+        runBlocking {
+            connectionManager?.disconnect()
+        }
         gyroController.stop()
     }
 
