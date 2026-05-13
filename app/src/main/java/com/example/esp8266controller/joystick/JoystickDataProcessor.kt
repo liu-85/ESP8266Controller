@@ -1,6 +1,7 @@
 package com.example.esp8266controller.joystick
 
 import com.example.esp8266controller.model.ControlConfig
+import com.example.esp8266controller.model.ControlMode
 import kotlin.math.*
 
 class JoystickDataProcessor(private val controlConfig: ControlConfig) {
