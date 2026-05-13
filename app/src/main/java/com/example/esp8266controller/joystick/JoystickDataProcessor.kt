@@ -73,6 +73,6 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
     fun formatCommand(throttleValue: Int, steeringValue: Int): String {
         val throttleCommand = controlConfig.throttleTemplate.replace("{value}", throttleValue.toString())
         val steeringCommand = controlConfig.steeringTemplate.replace("{value}", steeringValue.toString())
-        return "$throttleCommand,$steeringCommand\n"
+        return "SS2:$throttleCommand,$steeringCommand\n"
     }
 }

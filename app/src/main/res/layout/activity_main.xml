@@ -78,8 +78,8 @@
 
         <com.example.esp8266controller.joystick.JoystickView
             android:id="@+id/left_joystick"
-            android:layout_width="200dp"
-            android:layout_height="200dp"/>
+            android:layout_width="160dp"
+            android:layout_height="160dp"/>
     </LinearLayout>
 
     <!-- Middle Controls -->
@@ -201,18 +201,18 @@
 
         <com.example.esp8266controller.joystick.JoystickView
             android:id="@+id/right_joystick"
-            android:layout_width="200dp"
-            android:layout_height="200dp"/>
+            android:layout_width="160dp"
+            android:layout_height="160dp"/>
     </LinearLayout>
 
     <!-- Bottom Control Buttons (Custom Switches) -->
     <LinearLayout
         android:id="@+id/control_buttons_layout"
         android:layout_width="0dp"
-        android:layout_height="80dp"
+        android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center"
-        android:layout_margin="16dp"
+        android:layout_margin="8dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -220,34 +220,34 @@
         <Button
             android:id="@+id/btn_switch_1"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:text="灯光"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="4dp"
             style="@style/ControlButton"/>
 
         <Button
             android:id="@+id/btn_switch_2"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:text="蜂鸣器"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="4dp"
             style="@style/ControlButton"/>
 
         <Button
             android:id="@+id/btn_switch_3"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:text="开关3"
-            android:layout_marginEnd="8dp"
+            android:layout_marginEnd="4dp"
             style="@style/ControlButton"/>
 
         <Button
             android:id="@+id/btn_switch_4"
             android:layout_width="0dp"
-            android:layout_height="56dp"
+            android:layout_height="48dp"
             android:layout_weight="1"
             android:text="开关4"
             style="@style/ControlButton"/>

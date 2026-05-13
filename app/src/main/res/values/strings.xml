@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ESP8266遥控器</string>
+    <string name="app_name">RC遥控器</string>
     <string name="connection_status">连接状态</string>
     <string name="wifi">Wi-Fi</string>
     <string name="bluetooth">蓝牙</string>
