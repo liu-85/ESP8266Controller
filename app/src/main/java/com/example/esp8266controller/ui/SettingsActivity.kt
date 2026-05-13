@@ -212,13 +212,22 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun saveConfig() {
         appConfig?.let { config ->
+            val hasPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED
+            } else {
+                true
+            }
+
+            val bluetoothAddress = if (hasPermission) selectedBluetoothDevice?.address else null
+            val bluetoothName = if (hasPermission) selectedBluetoothDevice?.name else null
+
             val newConfig = config.copy(
                 connectionConfig = config.connectionConfig.copy(
                     connectionType = if (rbWifi.isChecked) ConnectionType.WIFI else ConnectionType.BLUETOOTH,
                     wifiIp = etWifiIp.text.toString(),
                     wifiPort = etWifiPort.text.toString().toIntOrNull() ?: 2000,
-                    bluetoothAddress = selectedBluetoothDevice?.address ?: config.connectionConfig.bluetoothAddress,
-                    bluetoothName = selectedBluetoothDevice?.name ?: config.connectionConfig.bluetoothName
+                    bluetoothAddress = bluetoothAddress ?: config.connectionConfig.bluetoothAddress,
+                    bluetoothName = bluetoothName ?: config.connectionConfig.bluetoothName
                 ),
                 controlConfig = config.controlConfig.copy(
                     throttleTemplate = etThrottleTemplate.text.toString(),
