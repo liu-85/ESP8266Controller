@@ -162,20 +162,30 @@ class MainActivity : AppCompatActivity() {
                 }
             }
             
-            // Toggle icons based on connection type
-            if (config.connectionConfig.connectionType == ConnectionType.WIFI) {
-                mainWifiIcon.visibility = View.VISIBLE
-                mainBtIcon.visibility = View.GONE
-            } else {
-                mainWifiIcon.visibility = View.GONE
-                mainBtIcon.visibility = View.VISIBLE
-            }
+            // Update connection icons state
+            updateConnectionStatusIcon(connectionManager?.connectionState is ConnectionState.Connected)
         }
     }
 
     private fun setupListeners() {
         openSettings.setOnClickListener {
             startActivityForResult(Intent(this, SettingsActivity::class.java), SETTINGS_REQUEST_CODE)
+        }
+
+        mainWifiIcon.setOnClickListener {
+            if (appConfig?.connectionConfig?.connectionType != ConnectionType.WIFI) {
+                toggleConnectionType(ConnectionType.WIFI)
+            } else {
+                reconnect()
+            }
+        }
+
+        mainBtIcon.setOnClickListener {
+            if (appConfig?.connectionConfig?.connectionType != ConnectionType.BLUETOOTH) {
+                toggleConnectionType(ConnectionType.BLUETOOTH)
+            } else {
+                reconnect()
+            }
         }
 
         findViewById<Button>(R.id.btn_servo_left).setOnClickListener { sendImmediateCommand("SERVO_LEFT") }
@@ -268,6 +278,82 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun toggleConnectionType(type: ConnectionType) {
+        appConfig?.let { config ->
+            val newConfig = config.copy(
+                connectionConfig = config.connectionConfig.copy(connectionType = type)
+            )
+            appConfig = newConfig
+            AppConfig.save(this, newConfig)
+            updateConnectionStatusIcon(false)
+            reconnect()
+        }
+    }
+
+    private fun reconnect() {
+        lifecycleScope.launch {
+            connectionManager?.disconnect()
+            val config = appConfig ?: return@launch
+            
+            connectionManager = when (config.connectionConfig.connectionType) {
+                ConnectionType.WIFI -> WifiConnectionManager(
+                    config.connectionConfig.wifiIp,
+                    config.connectionConfig.wifiPort
+                )
+                ConnectionType.BLUETOOTH -> BluetoothConnectionManager(
+                    this@MainActivity,
+                    config.connectionConfig.bluetoothAddress
+                )
+            }
+            
+            updateStatus("正在连接 ${if (config.connectionConfig.connectionType == ConnectionType.WIFI) "WIFI" else "蓝牙"}...")
+            val result = connectionManager?.connect()
+            
+            runOnUiThread {
+                if (result?.isSuccess == true) {
+                    updateConnectionStatusIcon(true)
+                    updateStatus("连接成功")
+                } else {
+                    updateConnectionStatusIcon(false)
+                    updateStatus("连接失败: ${result?.exceptionOrNull()?.message}")
+                }
+            }
+        }
+    }
+
+    private fun updateConnectionStatusIcon(connected: Boolean) {
+        val config = appConfig ?: return
+        val currentType = config.connectionConfig.connectionType
+        
+        runOnUiThread {
+            // Update WiFi icon
+            mainWifiIcon.alpha = if (currentType == ConnectionType.WIFI && connected) 1.0f else 0.3f
+            mainWifiIcon.scaleX = if (currentType == ConnectionType.WIFI) 1.1f else 1.0f
+            mainWifiIcon.scaleY = if (currentType == ConnectionType.WIFI) 1.1f else 1.0f
+            
+            // Update BT icon
+            mainBtIcon.alpha = if (currentType == ConnectionType.BLUETOOTH && connected) 1.0f else 0.3f
+            mainBtIcon.scaleX = if (currentType == ConnectionType.BLUETOOTH) 1.1f else 1.0f
+            mainBtIcon.scaleY = if (currentType == ConnectionType.BLUETOOTH) 1.1f else 1.0f
+            
+            // Background indication
+            val accentColor = when (config.currentTheme) {
+                AppTheme.THEME_1 -> resources.getColor(R.color.theme1_accent, null)
+                AppTheme.THEME_2 -> resources.getColor(R.color.theme2_accent, null)
+                AppTheme.THEME_3 -> resources.getColor(R.color.theme3_accent, null)
+                AppTheme.THEME_4 -> resources.getColor(R.color.theme4_accent, null)
+            }
+            
+            if (connected) {
+                if (currentType == ConnectionType.WIFI) mainWifiIcon.setTextColor(accentColor)
+                else mainBtIcon.setTextColor(accentColor)
+            } else {
+                mainWifiIcon.setTextColor(resources.getColor(R.color.white, null))
+                mainBtIcon.setTextColor(resources.getColor(R.color.white, null))
+            }
+        }
+    }
+
     private fun updateStatus(text: String) {
         status_bar.text = text
     }
@@ -353,17 +439,6 @@ class MainActivity : AppCompatActivity() {
                 @Suppress("DEPRECATION")
                 vibrator.vibrate(50)
             }
-        }
-    }
-
-    private fun updateConnectionStatusIcon(connected: Boolean) {
-        val wifiIcon = mainWifiIcon
-        val btIcon = mainBtIcon
-        if (connected) {
-            wifiIcon.setBackgroundResource(R.drawable.bg_circle_status)
-            btIcon.setBackgroundResource(R.drawable.bg_circle_status)
-        } else {
-            // Default grey or something
         }
     }
 
