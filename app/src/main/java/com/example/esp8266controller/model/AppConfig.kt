@@ -66,7 +66,8 @@ data class AppConfig(
                 centerValue = prefs.getInt("center_value", 1500),
                 sendIntervalMs = prefs.getLong("send_interval_ms", 50),
                 isTimerEnabled = prefs.getBoolean("is_timer_enabled", false),
-                isGyroEnabled = prefs.getBoolean("is_gyro_enabled", false)
+                isGyroEnabled = prefs.getBoolean("is_gyro_enabled", false),
+                gyroSensitivity = prefs.getFloat("gyro_sensitivity", 1.0f)
             )
         }
 
@@ -89,6 +90,7 @@ data class AppConfig(
                 putLong("send_interval_ms", config.controlConfig.sendIntervalMs)
                 putBoolean("is_timer_enabled", config.controlConfig.isTimerEnabled)
                 putBoolean("is_gyro_enabled", config.controlConfig.isGyroEnabled)
+                putFloat("gyro_sensitivity", config.controlConfig.gyroSensitivity)
 
                 putString("app_theme", config.currentTheme.name)
             }.apply()

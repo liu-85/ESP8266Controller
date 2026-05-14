@@ -129,4 +129,16 @@ class JoystickView @JvmOverloads constructor(
         onJoystickMoveListener?.invoke(angle, strength)
         invalidate()
     }
+
+    fun setKnobPosition(angle: Double, strength: Float) {
+        this.angle = angle
+        this.strength = strength.coerceIn(0f, 1f)
+        
+        val rad = Math.toRadians(angle - 90)
+        val dist = strength * joystickRadius
+        innerCircleX = centerX + (dist * cos(rad)).toFloat()
+        innerCircleY = centerY + (dist * sin(rad)).toFloat()
+        
+        invalidate()
+    }
 }

@@ -32,5 +32,6 @@ data class ControlConfig(
     val centerValue: Int = 1500,
     val sendIntervalMs: Long = 50, // UI.txt 建议定时发送，默认 50ms
     val isTimerEnabled: Boolean = false,
-    val isGyroEnabled: Boolean = false
+    val isGyroEnabled: Boolean = false,
+    val gyroSensitivity: Float = 1.0f
 )

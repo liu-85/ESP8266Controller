@@ -94,13 +94,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyTheme() {
         appConfig?.let { config ->
-            val bgColor = when (config.currentTheme) {
-                AppTheme.THEME_1 -> resources.getColor(R.color.theme1_bg, null)
-                AppTheme.THEME_2 -> resources.getColor(R.color.theme2_bg, null)
-                AppTheme.THEME_3 -> resources.getColor(R.color.theme3_bg, null)
-                AppTheme.THEME_4 -> resources.getColor(R.color.theme4_bg, null)
+            val (bgColor, accentColor) = when (config.currentTheme) {
+                AppTheme.THEME_1 -> resources.getColor(R.color.theme1_bg, null) to resources.getColor(R.color.theme1_accent, null)
+                AppTheme.THEME_2 -> resources.getColor(R.color.theme2_bg, null) to resources.getColor(R.color.theme2_accent, null)
+                AppTheme.THEME_3 -> resources.getColor(R.color.theme3_bg, null) to resources.getColor(R.color.theme3_accent, null)
+                AppTheme.THEME_4 -> resources.getColor(R.color.theme4_bg, null) to resources.getColor(R.color.theme4_accent, null)
             }
             mainLayout.setBackgroundColor(bgColor)
+            
+            // Apply accent color to icons and buttons
+            mainWifiIcon.setTextColor(accentColor)
+            mainBtIcon.setTextColor(accentColor)
+            openSettings.setColorFilter(accentColor)
+            gyroToggle.setTextColor(accentColor)
+            timerToggle.setTextColor(accentColor)
             
             // Toggle icons based on connection type
             if (config.connectionConfig.connectionType == ConnectionType.WIFI) {
@@ -199,11 +206,23 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupGyroController() {
         gyroController = GyroController(this, appConfig!!.controlConfig)
+        gyroController.setSensitivity(appConfig!!.controlConfig.gyroSensitivity)
         gyroController.setOnDataUpdateListener { pitch, roll ->
             if (appConfig?.controlConfig?.isGyroEnabled == true) {
                 val channelData = gyroController.processGyroData(pitch, roll)
                 leftY = channelData.throttle
                 leftX = channelData.steering
+                
+                // Update UI visually
+                val pitchStrength = Math.abs(pitch) / 45f
+                val rollStrength = Math.abs(roll) / 45f
+                val strength = Math.max(pitchStrength, rollStrength).coerceIn(0f, 1f)
+                val angle = Math.toDegrees(Math.atan2(roll.toDouble(), pitch.toDouble())) + 90
+                
+                runOnUiThread {
+                    leftJoystick.setKnobPosition(angle, strength)
+                }
+
                 updateStatus("陀螺仪控制: Y=$leftY, X=$leftX")
                 if (appConfig?.controlConfig?.isTimerEnabled == false) {
                     sendControlData()
@@ -261,6 +280,7 @@ class MainActivity : AppCompatActivity() {
             applyTheme()
             updateToggleButtons()
             dataProcessor = JoystickDataProcessor(appConfig!!.controlConfig)
+            setupGyroController() // Re-initialize with new sensitivity
 
             // Reconnect if needed
             lifecycleScope.launch {

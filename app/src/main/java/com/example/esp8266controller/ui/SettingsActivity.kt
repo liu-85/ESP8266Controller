@@ -27,6 +27,9 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var connectionStatus: TextView
     private lateinit var closeSettings: Button
 
+    private lateinit var sbGyroSensitivity: SeekBar
+    private lateinit var tvGyroSensitivityValue: TextView
+
     private lateinit var theme1Btn: Button
     private lateinit var theme2Btn: Button
     private lateinit var theme3Btn: Button
@@ -64,6 +67,9 @@ class SettingsActivity : AppCompatActivity() {
         saveConnectionBtn = findViewById(R.id.saveConnectionBtn)
         connectionStatus = findViewById(R.id.connectionStatus)
         closeSettings = findViewById(R.id.closeSettings)
+
+        sbGyroSensitivity = findViewById(R.id.sb_gyro_sensitivity)
+        tvGyroSensitivityValue = findViewById(R.id.tv_gyro_sensitivity_value)
 
         theme1Btn = findViewById(R.id.theme1Btn)
         theme2Btn = findViewById(R.id.theme2Btn)
@@ -106,6 +112,15 @@ class SettingsActivity : AppCompatActivity() {
         theme3Btn.setOnClickListener { selectedTheme = AppTheme.THEME_3; updateThemeUI() }
         theme4Btn.setOnClickListener { selectedTheme = AppTheme.THEME_4; updateThemeUI() }
 
+        sbGyroSensitivity.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val value = progress / 100f
+                tvGyroSensitivityValue.text = String.format("%.1f", value)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
         closeSettings.setOnClickListener {
             saveConfig()
             setResult(RESULT_OK)
@@ -114,15 +129,9 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updateConnectionUI() {
-        if (connectionType == ConnectionType.WIFI) {
-            wifiModeBtn.isSelected = true
-            btModeBtn.isSelected = false
-            wifiSettings.visibility = View.VISIBLE
-        } else {
-            wifiModeBtn.isSelected = false
-            btModeBtn.isSelected = true
-            wifiSettings.visibility = View.GONE
-        }
+        wifiModeBtn.isSelected = connectionType == ConnectionType.WIFI
+        btModeBtn.isSelected = connectionType == ConnectionType.BLUETOOTH
+        wifiSettings.visibility = if (connectionType == ConnectionType.WIFI) View.VISIBLE else View.GONE
     }
 
     private fun updateThemeUI() {
@@ -138,6 +147,9 @@ class SettingsActivity : AppCompatActivity() {
             portInput.setText(config.connectionConfig.wifiPort.toString())
             connectionType = config.connectionConfig.connectionType
             selectedTheme = config.currentTheme
+
+            sbGyroSensitivity.progress = (config.controlConfig.gyroSensitivity * 100).toInt()
+            tvGyroSensitivityValue.text = String.format("%.1f", config.controlConfig.gyroSensitivity)
 
             config.controlConfig.channelSources.forEachIndexed { index, source ->
                 if (index < spinners.size) {
@@ -161,7 +173,8 @@ class SettingsActivity : AppCompatActivity() {
                     wifiPort = portInput.text.toString().toIntOrNull() ?: 2000
                 ),
                 controlConfig = config.controlConfig.copy(
-                    channelSources = newSources
+                    channelSources = newSources,
+                    gyroSensitivity = sbGyroSensitivity.progress / 100f
                 ),
                 currentTheme = selectedTheme
             )
