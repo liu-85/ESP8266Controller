@@ -10,7 +10,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SwitchCompat
-import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import com.example.esp8266controller.R
 import com.example.esp8266controller.connection.*
@@ -21,38 +20,25 @@ import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var mainLayout: View
     private lateinit var leftJoystick: JoystickView
     private lateinit var rightJoystick: JoystickView
     private lateinit var gyroController: GyroController
 
-    private lateinit var tvConnectionStatus: TextView
-    private lateinit var tvModeStatus: TextView
-    private lateinit var switchGyroMode: SwitchCompat
-    private lateinit var btnCalibrate: Button
+    private lateinit var mainWifiIcon: TextView
+    private lateinit var mainBtIcon: TextView
+    private lateinit var status_bar: TextView
 
-    private lateinit var btnServoLeft: Button
-    private lateinit var btnServoCenter: Button
-    private lateinit var btnServoRight: Button
+    private lateinit var btn1: Button
+    private lateinit var btn2: Button
+    private lateinit var btn3: Button
+    private lateinit var btn4: Button
+    private lateinit var switch1: SwitchCompat
+    private lateinit var switch2: SwitchCompat
+    private lateinit var openSettings: ImageButton
 
-    private lateinit var btnSwitch1: Button
-    private lateinit var btnSwitch2: Button
-    private lateinit var btnSwitch3: Button
-    private lateinit var btnSwitch4: Button
-    private lateinit var btnSettings: Button
-
-    // V7 Style UI Elements
-    private lateinit var tvLeftValLarge: TextView
-    private lateinit var tvLeftValRaw: TextView
-    private lateinit var tvRightValLarge: TextView
-    private lateinit var tvRightValRaw: TextView
-    private lateinit var tvConnectionStatusV7: TextView
-    private lateinit var tvDeviceInfoV7: TextView
-    private lateinit var tvConnectTypeV7: TextView
-    private lateinit var btnSettingsTop: ImageButton
-    private lateinit var btnChannelsTop: ImageButton
-    private lateinit var btnServoLeftV7: ImageButton
-    private lateinit var btnServoCenterV7: ImageButton
-    private lateinit var btnServoRightV7: ImageButton
+    private lateinit var gyroToggle: Button
+    private lateinit var timerToggle: Button
 
     private var connectionManager: ConnectionManager? = null
     private var appConfig: AppConfig? = null
@@ -62,9 +48,10 @@ class MainActivity : AppCompatActivity() {
     private val controlScope = CoroutineScope(Dispatchers.IO + controlJob)
     private var sendDataJob: Job? = null
 
-    private var lastThrottleValue: Int = 1500
-    private var lastSteeringValue: Int = 1500
-    private var isGyroEnabled: Boolean = false
+    private var leftY: Int = 1500
+    private var leftX: Int = 1500
+    private var rightY: Int = 1500
+    private var rightX: Int = 1500
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -76,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         setupJoystickProcessor()
         setupGyroController()
         setupPeriodicSend()
+        applyTheme()
     }
 
     private fun loadConfig() {
@@ -84,205 +72,142 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
+        mainLayout = findViewById(R.id.main_layout)
+        leftJoystick = findViewById(R.id.leftJoystick)
+        rightJoystick = findViewById(R.id.rightJoystick)
 
-        tvConnectionStatus = findViewById<TextView>(R.id.tv_connection_status)
-        tvModeStatus = findViewById<TextView>(R.id.tv_mode_status)
-        switchGyroMode = findViewById<SwitchCompat>(R.id.switch_gyro_mode)
-        btnCalibrate = findViewById<Button>(R.id.btn_calibrate)
+        mainWifiIcon = findViewById(R.id.mainWifiIcon)
+        mainBtIcon = findViewById(R.id.mainBtIcon)
+        status_bar = findViewById(R.id.status_bar)
 
-        leftJoystick = findViewById<JoystickView>(R.id.left_joystick)
-        rightJoystick = findViewById<JoystickView>(R.id.right_joystick)
+        btn1 = findViewById(R.id.btn1)
+        btn2 = findViewById(R.id.btn2)
+        btn3 = findViewById(R.id.btn3)
+        btn4 = findViewById(R.id.btn4)
+        switch1 = findViewById(R.id.switch1)
+        switch2 = findViewById(R.id.switch2)
+        openSettings = findViewById(R.id.openSettings)
 
-        btnServoLeft = findViewById<Button>(R.id.btn_servo_left)
-        btnServoCenter = findViewById<Button>(R.id.btn_servo_center)
-        btnServoRight = findViewById<Button>(R.id.btn_servo_right)
-
-        btnSwitch1 = findViewById<Button>(R.id.btn_switch_1)
-        btnSwitch2 = findViewById<Button>(R.id.btn_switch_2)
-        btnSwitch3 = findViewById<Button>(R.id.btn_switch_3)
-        btnSwitch4 = findViewById<Button>(R.id.btn_switch_4)
-        btnSettings = findViewById<Button>(R.id.btn_settings)
-
-        // V7 UI Bindings
-        tvLeftValLarge = findViewById(R.id.tv_left_val_large)
-        tvLeftValRaw = findViewById(R.id.tv_left_val_raw)
-        tvRightValLarge = findViewById(R.id.tv_right_val_large)
-        tvRightValRaw = findViewById(R.id.tv_right_val_raw)
-        tvConnectionStatusV7 = findViewById(R.id.tv_connection_status_v7)
-        tvDeviceInfoV7 = findViewById(R.id.tv_device_info_v7)
-        tvConnectTypeV7 = findViewById(R.id.tv_connect_type_v7)
-        btnSettingsTop = findViewById(R.id.btn_settings_top)
-        btnChannelsTop = findViewById(R.id.btn_channels_top)
-        btnServoLeftV7 = findViewById(R.id.btn_servo_left_v7)
-        btnServoCenterV7 = findViewById(R.id.btn_servo_center_v7)
-        btnServoRightV7 = findViewById(R.id.btn_servo_right_v7)
-
-        updateCustomSwitches()
-        updateV7Status()
+        gyroToggle = findViewById(R.id.gyroToggle)
+        timerToggle = findViewById(R.id.timerToggle)
     }
 
-    private fun updateV7Status() {
-        tvDeviceInfoV7.text = "装置：${appConfig?.connectionConfig?.wifiIp ?: "未知"}"
-        tvConnectTypeV7.text = "连结方式：${appConfig?.connectionConfig?.connectionType?.name ?: "WIFI"}"
-        
-        val statusText = when (connectionManager?.connectionState) {
-            is ConnectionState.Connected -> "已连线"
-            is ConnectionState.Connecting -> "连线中..."
-            else -> "未连线"
-        }
-        tvConnectionStatusV7.text = statusText
-    }
-
-    private fun updateCustomSwitches() {
-        appConfig?.customSwitches?.let { switches ->
-            switches.forEachIndexed { index, switch ->
-                val button = when (index) {
-                    0 -> btnSwitch1
-                    1 -> btnSwitch2
-                    2 -> btnSwitch3
-                    3 -> btnSwitch4
-                    else -> null
-                }
-                button?.text = switch.name
-                button?.isSelected = switch.isOn
-                updateButtonStyle(button, switch.isOn)
+    private fun applyTheme() {
+        appConfig?.let { config ->
+            val bgColor = when (config.currentTheme) {
+                AppTheme.THEME_1 -> resources.getColor(R.color.theme1_bg, null)
+                AppTheme.THEME_2 -> resources.getColor(R.color.theme2_bg, null)
+                AppTheme.THEME_3 -> resources.getColor(R.color.theme3_bg, null)
+                AppTheme.THEME_4 -> resources.getColor(R.color.theme4_bg, null)
             }
-        }
-    }
-
-    private fun updateButtonStyle(button: Button?, isOn: Boolean) {
-        button?.let {
-            if (isOn) {
-                it.setTextColor(resources.getColor(R.color.white, null))
+            mainLayout.setBackgroundColor(bgColor)
+            
+            // Toggle icons based on connection type
+            if (config.connectionConfig.connectionType == ConnectionType.WIFI) {
+                mainWifiIcon.visibility = View.VISIBLE
+                mainBtIcon.visibility = View.GONE
             } else {
-                it.setTextColor(resources.getColor(R.color.textDark, null))
+                mainWifiIcon.visibility = View.GONE
+                mainBtIcon.visibility = View.VISIBLE
             }
         }
     }
 
     private fun setupListeners() {
-        btnSettings.setOnClickListener {
+        openSettings.setOnClickListener {
             startActivityForResult(Intent(this, SettingsActivity::class.java), SETTINGS_REQUEST_CODE)
         }
 
-        btnSettingsTop.setOnClickListener {
-            startActivityForResult(Intent(this, SettingsActivity::class.java), SETTINGS_REQUEST_CODE)
-        }
-
-        btnChannelsTop.setOnClickListener {
-            // TODO: Implement channel mapping UI or just open settings for now
-            startActivityForResult(Intent(this, SettingsActivity::class.java), SETTINGS_REQUEST_CODE)
-        }
-
-        switchGyroMode.setOnCheckedChangeListener { _, isChecked ->
-            isGyroEnabled = isChecked
-            tvModeStatus.text = if (isChecked) getString(R.string.gyro_mode) else getString(R.string.joystick_mode)
-            btnCalibrate.visibility = if (isChecked) View.VISIBLE else View.GONE
-
-            if (isChecked) {
-                leftJoystick.visibility = View.INVISIBLE
-                rightJoystick.visibility = View.INVISIBLE
-                gyroController.start()
-            } else {
-                leftJoystick.visibility = View.VISIBLE
-                rightJoystick.visibility = View.VISIBLE
-                gyroController.stop()
-                leftJoystick.reset()
-                rightJoystick.reset()
+        gyroToggle.setOnClickListener {
+            appConfig?.let { config ->
+                val newState = !config.controlConfig.isGyroEnabled
+                val newConfig = config.copy(
+                    controlConfig = config.controlConfig.copy(isGyroEnabled = newState)
+                )
+                appConfig = newConfig
+                AppConfig.save(this, newConfig)
+                updateToggleButtons()
+                
+                if (newState) {
+                    gyroController.start()
+                } else {
+                    gyroController.stop()
+                    leftJoystick.reset()
+                }
             }
         }
 
-        btnCalibrate.setOnClickListener {
-            gyroController.calibrate()
-            Toast.makeText(this, "陀螺仪已校准", Toast.LENGTH_SHORT).show()
+        timerToggle.setOnClickListener {
+            appConfig?.let { config ->
+                val newState = !config.controlConfig.isTimerEnabled
+                val newConfig = config.copy(
+                    controlConfig = config.controlConfig.copy(isTimerEnabled = newState)
+                )
+                appConfig = newConfig
+                AppConfig.save(this, newConfig)
+                updateToggleButtons()
+            }
         }
 
-        setupServoButtons()
-        setupCustomSwitchButtons()
+        // Button clicks also trigger immediate send if timer is off
+        val onButtonClick = { sendControlData() }
+        btn1.setOnClickListener { onButtonClick() }
+        btn2.setOnClickListener { onButtonClick() }
+        btn3.setOnClickListener { onButtonClick() }
+        btn4.setOnClickListener { onButtonClick() }
+        switch1.setOnCheckedChangeListener { _, _ -> onButtonClick() }
+        switch2.setOnCheckedChangeListener { _, _ -> onButtonClick() }
+
+        updateToggleButtons()
     }
 
-    private fun setupServoButtons() {
-        val onServoLeft = { sendServoCommand(appConfig!!.controlConfig.servoLeftCommand) }
-        val onServoCenter = { sendServoCommand(appConfig!!.controlConfig.servoCenterCommand) }
-        val onServoRight = { sendServoCommand(appConfig!!.controlConfig.servoRightCommand) }
-
-        btnServoLeft.setOnClickListener { onServoLeft() }
-        btnServoCenter.setOnClickListener { onServoCenter() }
-        btnServoRight.setOnClickListener { onServoRight() }
-
-        btnServoLeftV7.setOnClickListener { onServoLeft() }
-        btnServoCenterV7.setOnClickListener { onServoCenter() }
-        btnServoRightV7.setOnClickListener { onServoRight() }
-    }
-
-    private fun setupCustomSwitchButtons() {
-        btnSwitch1.setOnClickListener { toggleCustomSwitch(0) }
-        btnSwitch2.setOnClickListener { toggleCustomSwitch(1) }
-        btnSwitch3.setOnClickListener { toggleCustomSwitch(2) }
-        btnSwitch4.setOnClickListener { toggleCustomSwitch(3) }
-    }
-
-    private fun toggleCustomSwitch(index: Int) {
-        appConfig?.customSwitches?.getOrNull(index)?.let { switch ->
-            switch.isOn = !switch.isOn
-            val command = if (switch.isOn) switch.onCommand else switch.offCommand
-            sendCustomCommand(command)
-
-            val button = when (index) {
-                0 -> btnSwitch1
-                1 -> btnSwitch2
-                2 -> btnSwitch3
-                3 -> btnSwitch4
-                else -> null
-            }
-            button?.isSelected = switch.isOn
-            updateButtonStyle(button, switch.isOn)
-
-            AppConfig.save(this, appConfig!!)
+    private fun updateToggleButtons() {
+        appConfig?.let { config ->
+            gyroToggle.text = "陀螺仪: ${if (config.controlConfig.isGyroEnabled) "ON" else "OFF"}"
+            gyroToggle.isSelected = config.controlConfig.isGyroEnabled
+            
+            timerToggle.text = "定时发送: ${if (config.controlConfig.isTimerEnabled) "ON" else "OFF"}"
+            timerToggle.isSelected = config.controlConfig.isTimerEnabled
         }
     }
 
     private fun setupJoystickProcessor() {
         leftJoystick.setOnJoystickMoveListener { angle, strength ->
-            if (!isGyroEnabled) {
-                processDataWithJoystick(angle, strength, rightJoystick.angle, rightJoystick.strength)
+            if (appConfig?.controlConfig?.isGyroEnabled == false) {
+                leftY = dataProcessor!!.mapToChannelValue(angle, strength, true)
+                leftX = dataProcessor!!.mapToChannelValue(angle, strength, false)
+                updateStatus("左摇杆: Y=$leftY, X=$leftX")
+                if (appConfig?.controlConfig?.isTimerEnabled == false) {
+                    sendControlData()
+                }
             }
         }
 
         rightJoystick.setOnJoystickMoveListener { angle, strength ->
-            if (!isGyroEnabled) {
-                processDataWithJoystick(leftJoystick.angle, leftJoystick.strength, angle, strength)
+            rightY = dataProcessor!!.mapToChannelValue(angle, strength, true)
+            rightX = dataProcessor!!.mapToChannelValue(angle, strength, false)
+            updateStatus("右摇杆: Y=$rightY, X=$rightX")
+            if (appConfig?.controlConfig?.isTimerEnabled == false) {
+                sendControlData()
             }
         }
     }
 
-    private fun processDataWithJoystick(
-        throttleAngle: Double,
-        throttleStrength: Float,
-        steeringAngle: Double,
-        steeringStrength: Float
-    ) {
-        val channelData = dataProcessor?.processJoystickData(
-            throttleAngle, throttleStrength,
-            steeringAngle, steeringStrength
-        )
-        channelData?.let {
-            lastThrottleValue = it.throttle
-            lastSteeringValue = it.steering
-        }
+    private fun updateStatus(text: String) {
+        status_bar.text = text
     }
 
     private fun setupGyroController() {
         gyroController = GyroController(this, appConfig!!.controlConfig)
-        gyroController.setSensitivity(appConfig!!.gyroSensitivity)
-
         gyroController.setOnDataUpdateListener { pitch, roll ->
-            if (isGyroEnabled) {
+            if (appConfig?.controlConfig?.isGyroEnabled == true) {
                 val channelData = gyroController.processGyroData(pitch, roll)
-                lastThrottleValue = channelData.throttle
-                lastSteeringValue = channelData.steering
+                leftY = channelData.throttle
+                leftX = channelData.steering
+                updateStatus("陀螺仪控制: Y=$leftY, X=$leftX")
+                if (appConfig?.controlConfig?.isTimerEnabled == false) {
+                    sendControlData()
+                }
             }
         }
     }
@@ -290,110 +215,42 @@ class MainActivity : AppCompatActivity() {
     private fun setupPeriodicSend() {
         sendDataJob = controlScope.launch {
             while (isActive) {
-                sendControlData()
-                delay(appConfig!!.controlConfig.sendIntervalMs)
+                if (appConfig?.controlConfig?.isTimerEnabled == true) {
+                    sendControlData()
+                }
+                delay(appConfig?.controlConfig?.sendIntervalMs ?: 50)
             }
         }
     }
 
-    private suspend fun sendControlData() {
-        connectionManager?.let { manager ->
-            if (manager.connectionState is ConnectionState.Connected) {
-                // 如果摇杆没有被触摸，确保发送中性值 1500
-                val throttle = if (leftJoystick.strength < 0.05f) 1500 else lastThrottleValue
-                val steering = if (rightJoystick.strength < 0.05f) 1500 else lastSteeringValue
-                
-                val command = dataProcessor?.formatCommand(throttle, steering)
-                command?.let { payload ->
-                    // 更新 UI 数值显示 (回到主线程)
-                    withContext(Dispatchers.Main) {
-                        tvLeftValRaw.text = throttle.toString()
-                        tvRightValRaw.text = steering.toString()
-                        tvLeftValLarge.text = (throttle - 1500).toString()
-                        tvRightValLarge.text = (steering - 1500).toString()
-                        updateV7Status()
-                    }
+    private fun sendControlData() {
+        val manager = connectionManager ?: return
+        if (manager.connectionState !is ConnectionState.Connected) return
 
-                    val sendResult = manager.sendData(payload)
-                    if (sendResult.isFailure) {
-                        val error = sendResult.exceptionOrNull()
-                        lifecycleScope.launch {
-                            Toast.makeText(
-                                this@MainActivity,
-                                "发送失败: ${error?.message}",
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
+        controlScope.launch {
+            val command = dataProcessor?.formatCommand(
+                leftY, leftX,
+                rightY, rightX,
+                listOf(btn1.isPressed, btn2.isPressed, btn3.isPressed, btn4.isPressed),
+                listOf(switch1.isChecked, switch2.isChecked)
+            )
+            command?.let { payload ->
+                manager.sendData(payload)
+                withContext(Dispatchers.Main) {
+                    updateConnectionStatusIcon(true)
                 }
             }
         }
     }
 
-    private fun sendServoCommand(command: String) {
-        lifecycleScope.launch {
-            val manager = connectionManager ?: return@launch
-            val sendResult = manager.sendData("$command\n")
-            if (sendResult.isFailure) {
-                val error = sendResult.exceptionOrNull()
-                Toast.makeText(this@MainActivity, "发送失败: ${error?.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    private fun sendCustomCommand(command: String) {
-        lifecycleScope.launch {
-            val manager = connectionManager ?: return@launch
-            val sendResult = manager.sendData("$command\n")
-            if (sendResult.isFailure) {
-                val error = sendResult.exceptionOrNull()
-                Toast.makeText(this@MainActivity, "发送失败: ${error?.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    fun connectToWifi(ip: String, port: Int) {
-        lifecycleScope.launch {
-            connectionManager?.disconnect()
-            connectionManager = WifiConnectionManager(ip, port)
-
-            tvConnectionStatus.text = getString(R.string.connecting)
-            val connectResult = connectionManager!!.connect()
-            if (connectResult.isSuccess) {
-                tvConnectionStatus.text = connectionManager!!.getConnectionInfo()
-                // 连接成功后立即发送一次停止指令 (1500, 1500)，防止电机因旧状态乱转
-                connectionManager?.sendData("SS2:1500,1500\n")
-            } else {
-                tvConnectionStatus.text = getString(R.string.disconnected)
-                val error = connectResult.exceptionOrNull()
-                Toast.makeText(this@MainActivity, "连接失败: ${error?.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    fun connectToBluetooth(deviceAddress: String) {
-        lifecycleScope.launch {
-            connectionManager?.disconnect()
-            connectionManager = BluetoothConnectionManager(this@MainActivity, deviceAddress)
-
-            tvConnectionStatus.text = getString(R.string.connecting)
-            val connectResult = connectionManager!!.connect()
-            if (connectResult.isSuccess) {
-                tvConnectionStatus.text = connectionManager!!.getConnectionInfo()
-                // 连接成功后立即发送一次停止指令 (1500, 1500)
-                connectionManager?.sendData("SS2:1500,1500\n")
-            } else {
-                tvConnectionStatus.text = getString(R.string.disconnected)
-                val error = connectResult.exceptionOrNull()
-                Toast.makeText(this@MainActivity, "连接失败: ${error?.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
-
-    fun disconnect() {
-        lifecycleScope.launch {
-            connectionManager?.disconnect()
-            tvConnectionStatus.text = getString(R.string.disconnected)
+    private fun updateConnectionStatusIcon(connected: Boolean) {
+        val wifiIcon = mainWifiIcon
+        val btIcon = mainBtIcon
+        if (connected) {
+            wifiIcon.setBackgroundResource(R.drawable.bg_circle_status)
+            btIcon.setBackgroundResource(R.drawable.bg_circle_status)
+        } else {
+            // Default grey or something
         }
     }
 
@@ -401,20 +258,28 @@ class MainActivity : AppCompatActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == SETTINGS_REQUEST_CODE && resultCode == RESULT_OK) {
             loadConfig()
-            updateCustomSwitches()
-            gyroController.setSensitivity(appConfig!!.gyroSensitivity)
+            applyTheme()
+            updateToggleButtons()
             dataProcessor = JoystickDataProcessor(appConfig!!.controlConfig)
 
-            // Attempt to connect/reconnect with new settings
-            disconnect()
-            when (appConfig!!.connectionConfig.connectionType) {
-                ConnectionType.WIFI -> connectToWifi(
-                    appConfig!!.connectionConfig.wifiIp,
-                    appConfig!!.connectionConfig.wifiPort
-                )
-                ConnectionType.BLUETOOTH -> connectToBluetooth(
-                    appConfig!!.connectionConfig.bluetoothAddress
-                )
+            // Reconnect if needed
+            lifecycleScope.launch {
+                connectionManager?.disconnect()
+                when (appConfig!!.connectionConfig.connectionType) {
+                    ConnectionType.WIFI -> {
+                        connectionManager = WifiConnectionManager(
+                            appConfig!!.connectionConfig.wifiIp,
+                            appConfig!!.connectionConfig.wifiPort
+                        )
+                    }
+                    ConnectionType.BLUETOOTH -> {
+                        connectionManager = BluetoothConnectionManager(
+                            this@MainActivity,
+                            appConfig!!.connectionConfig.bluetoothAddress
+                        )
+                    }
+                }
+                connectionManager?.connect()
             }
         }
     }

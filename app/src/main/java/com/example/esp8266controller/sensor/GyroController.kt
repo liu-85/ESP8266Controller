@@ -17,6 +17,8 @@ class GyroController(
     private val controlConfig: ControlConfig
 ) : SensorEventListener {
 
+    data class ChannelData(val throttle: Int, val steering: Int)
+
     private var sensorManager: SensorManager? = null
     private var gyroSensor: Sensor? = null
     private var isGyroEnabled: Boolean = false
@@ -93,7 +95,7 @@ class GyroController(
         // Not used
     }
 
-    fun processGyroData(pitch: Float, roll: Float): JoystickDataProcessor.ChannelData {
+    fun processGyroData(pitch: Float, roll: Float): ChannelData {
         // Convert pitch/roll to joystick-like values
         // Pitch: forward/backward (positive pitch = forward)
         // Roll: left/right (positive roll = right)
@@ -101,31 +103,17 @@ class GyroController(
         val pitchStrength = abs(pitch) / 45f
         val rollStrength = abs(roll) / 45f
 
-        val pitchAngle = when {
-            pitch > 0 -> 0f // Forward
-            pitch < 0 -> 180f // Backward
-            else -> 90f // Center
-        }
+        val pitchAngle = if (pitch > 0) 0.0 else 180.0
+        val rollAngle = if (roll > 0) 90.0 else 270.0
 
-        val rollAngle = when {
-            roll > 0 -> 90f // Right
-            roll < 0 -> 270f // Left
-            else -> 0f // Center
-        }
+        val throttle = dataProcessor.mapToChannelValue(pitchAngle, pitchStrength, true)
+        val steering = dataProcessor.mapToChannelValue(rollAngle, rollStrength, false)
 
-        return dataProcessor.processJoystickData(
-            pitchAngle.toDouble(),
-            pitchStrength,
-            rollAngle.toDouble(),
-            rollStrength
-        )
+        return ChannelData(throttle, steering)
     }
 
     fun isEnabled(): Boolean = isGyroEnabled
-
     fun isCalibrated(): Boolean = isCalibrated
-
     fun getLastPitch(): Float = lastPitch
-
     fun getLastRoll(): Float = lastRoll
 }

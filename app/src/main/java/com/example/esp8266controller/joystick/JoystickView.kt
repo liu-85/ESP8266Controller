@@ -25,7 +25,7 @@ class JoystickView @JvmOverloads constructor(
 
     private val outerPaint: Paint = Paint()
     private val innerPaint: Paint = Paint()
-    private val borderPaint: Paint = Paint()
+    private val ringPaint: Paint = Paint()
 
     private var onJoystickMoveListener: ((angle: Double, strength: Float) -> Unit)? = null
 
@@ -33,18 +33,19 @@ class JoystickView @JvmOverloads constructor(
     var strength: Float = 0.0f
 
     init {
-        outerPaint.color = Color.parseColor("#E0E0E0")
+        // Style matching UI.txt
+        outerPaint.color = Color.parseColor("#33FFFFFF")
         outerPaint.style = Paint.Style.FILL
         outerPaint.isAntiAlias = true
 
-        innerPaint.color = Color.parseColor("#2196F3")
+        innerPaint.color = Color.parseColor("#FFD700") // v7rc_yellow
         innerPaint.style = Paint.Style.FILL
         innerPaint.isAntiAlias = true
 
-        borderPaint.color = Color.parseColor("#FFFFFF")
-        borderPaint.style = Paint.Style.STROKE
-        borderPaint.strokeWidth = 4f
-        borderPaint.isAntiAlias = true
+        ringPaint.color = Color.WHITE
+        ringPaint.style = Paint.Style.STROKE
+        ringPaint.strokeWidth = 2f
+        ringPaint.isAntiAlias = true
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -59,8 +60,8 @@ class JoystickView @JvmOverloads constructor(
         super.onSizeChanged(w, h, oldw, oldh)
         centerX = w / 2f
         centerY = h / 2f
-        joystickRadius = min(w, h) / 2f * 0.8f
-        innerRadius = joystickRadius * 0.3f
+        joystickRadius = min(w, h) / 2f * 0.9f
+        innerRadius = joystickRadius * 0.4f
 
         innerCircleX = centerX
         innerCircleY = centerY
@@ -69,13 +70,14 @@ class JoystickView @JvmOverloads constructor(
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
 
-        // Draw outer circle
+        // Draw ring
+        canvas.drawCircle(centerX, centerY, joystickRadius, ringPaint)
+        
+        // Draw background
         canvas.drawCircle(centerX, centerY, joystickRadius, outerPaint)
-        canvas.drawCircle(centerX, centerY, joystickRadius, borderPaint)
 
-        // Draw inner circle (joystick)
+        // Draw inner knob
         canvas.drawCircle(innerCircleX, innerCircleY, innerRadius, innerPaint)
-        canvas.drawCircle(innerCircleX, innerCircleY, innerRadius, borderPaint)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -83,42 +85,33 @@ class JoystickView @JvmOverloads constructor(
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
                 val dx = event.x - centerX
                 val dy = event.y - centerY
+                val dist = sqrt((dx * dx + dy * dy).toDouble()).toFloat()
 
-                val distance = sqrt(dx.toDouble().pow(2) + dy.toDouble().pow(2))
-                val maxDistance = joystickRadius - innerRadius
-
-                if (distance <= maxDistance) {
+                if (dist <= joystickRadius) {
                     innerCircleX = event.x
                     innerCircleY = event.y
                 } else {
-                    // Clamp to outer circle boundary
-                    val ratio = maxDistance / distance
-                    innerCircleX = centerX + dx.toFloat() * ratio.toFloat()
-                    innerCircleY = centerY + dy.toFloat() * ratio.toFloat()
+                    val ratio = joystickRadius / dist
+                    innerCircleX = centerX + dx * ratio
+                    innerCircleY = centerY + dy * ratio
                 }
 
                 // Calculate angle (0° = top, 90° = right, 180° = bottom, 270° = left)
                 angle = atan2((innerCircleY - centerY).toDouble(), (innerCircleX - centerX).toDouble()) * (180 / PI) + 90
-                if (angle < 0) angle += 360
+                if (angle < 0) angle += 360.0
 
-                // Calculate strength (0 = center, 1 = full)
-                val offsetDist = sqrt(
+                // Calculate strength (0.0 to 1.0)
+                val currentDist = sqrt(
                     (innerCircleX - centerX).toDouble().pow(2.0) +
                         (innerCircleY - centerY).toDouble().pow(2.0)
                 ).toFloat()
-                strength = offsetDist / maxDistance
+                strength = (currentDist / joystickRadius).coerceIn(0f, 1f)
 
                 onJoystickMoveListener?.invoke(angle, strength)
                 invalidate()
             }
-
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                innerCircleX = centerX
-                innerCircleY = centerY
-                angle = 0.0
-                strength = 0f
-                onJoystickMoveListener?.invoke(angle, strength)
-                invalidate()
+                reset()
             }
         }
         return true

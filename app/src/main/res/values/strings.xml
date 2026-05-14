@@ -27,6 +27,21 @@
     <string name="connected">已连接</string>
     <string name="disconnected">未连接</string>
     <string name="connecting">正在连接...</string>
+    
+    <string-array name="control_source_options">
+        <item>左摇杆Y (油门)</item>
+        <item>左摇杆X (转向)</item>
+        <item>右摇杆Y (油门)</item>
+        <item>右摇杆X (转向)</item>
+        <item>按键 1</item>
+        <item>按键 2</item>
+        <item>按键 3</item>
+        <item>按键 4</item>
+        <item>开关 1</item>
+        <item>开关 2</item>
+        <item>无 (中性 1500)</item>
+    </string-array>
+
     <string-array name="mixed_source_options">
         <item>油门 (Throttle)</item>
         <item>转向 (Steering)</item>

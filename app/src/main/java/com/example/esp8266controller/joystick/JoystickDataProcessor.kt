@@ -1,35 +1,12 @@
 package com.example.esp8266controller.joystick
 
 import com.example.esp8266controller.model.ControlConfig
-import com.example.esp8266controller.model.ControlMode
-import com.example.esp8266controller.model.ChannelSource
+import com.example.esp8266controller.model.ControlSource
 import kotlin.math.*
 
 class JoystickDataProcessor(private val controlConfig: ControlConfig) {
 
-    data class ChannelData(
-        val throttle: Int,
-        val steering: Int
-    )
-
-    fun processJoystickData(
-        throttleAngle: Double,
-        throttleStrength: Float,
-        steeringAngle: Double,
-        steeringStrength: Float
-    ): ChannelData {
-        // 转向始终由右摇杆 X 轴控制 (Horizontal)
-        val steeringValue = mapToChannelValue(steeringAngle, steeringStrength, isVertical = false)
-        
-        // 油门始终由左摇杆 Y 轴控制 (Vertical)
-        val throttleValue = mapToChannelValue(throttleAngle, throttleStrength, isVertical = true)
-
-        // 无论是 MIXED 还是 SEPARATE，processJoystickData 仅返回基础的油门和转向数值
-        // 最终的通道映射由 formatCommand 根据配置完成
-        return ChannelData(throttleValue, steeringValue)
-    }
-
-    private fun mapToChannelValue(angle: Double, strength: Float, isVertical: Boolean): Int {
+    fun mapToChannelValue(angle: Double, strength: Float, isVertical: Boolean): Int {
         val center = controlConfig.centerValue
         val minVal = controlConfig.minChannelValue
         val maxVal = controlConfig.maxChannelValue
@@ -75,28 +52,28 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
         }
     }
 
-    fun formatCommand(throttleValue: Int, steeringValue: Int): String {
-        val ch1: Int
-        val ch2: Int
-
-        if (controlConfig.controlMode == ControlMode.MIXED) {
-            // 混控模式：根据设置的通道来源分配值
-            ch1 = when (controlConfig.ch1Source) {
-                ChannelSource.THROTTLE -> throttleValue
-                ChannelSource.STEERING -> steeringValue
-                ChannelSource.NEUTRAL -> 1500
+    fun formatCommand(
+        leftY: Int, leftX: Int,
+        rightY: Int, rightX: Int,
+        buttons: List<Boolean>,
+        switches: List<Boolean>
+    ): String {
+        val channelValues = controlConfig.channelSources.map { source ->
+            when (source) {
+                ControlSource.LEFT_JOYSTICK_Y -> leftY
+                ControlSource.LEFT_JOYSTICK_X -> leftX
+                ControlSource.RIGHT_JOYSTICK_Y -> rightY
+                ControlSource.RIGHT_JOYSTICK_X -> rightX
+                ControlSource.BUTTON_1 -> if (buttons.getOrElse(0) { false }) 2000 else 1000
+                ControlSource.BUTTON_2 -> if (buttons.getOrElse(1) { false }) 2000 else 1000
+                ControlSource.BUTTON_3 -> if (buttons.getOrElse(2) { false }) 2000 else 1000
+                ControlSource.BUTTON_4 -> if (buttons.getOrElse(3) { false }) 2000 else 1000
+                ControlSource.SWITCH_1 -> if (switches.getOrElse(0) { false }) 2000 else 1000
+                ControlSource.SWITCH_2 -> if (switches.getOrElse(1) { false }) 2000 else 1000
+                ControlSource.NONE -> 1500
             }
-            ch2 = when (controlConfig.ch2Source) {
-                ChannelSource.THROTTLE -> throttleValue
-                ChannelSource.STEERING -> steeringValue
-                ChannelSource.NEUTRAL -> 1500
-            }
-        } else {
-            // 独立模式：默认 ch1=左Y, ch2=右X (已经由 processJoystickData 计算好)
-            ch1 = throttleValue
-            ch2 = steeringValue
         }
 
-        return "SS2:$ch1,$ch2\n"
+        return "SS2:${channelValues.joinToString(",")}\n"
     }
 }
