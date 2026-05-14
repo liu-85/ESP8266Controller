@@ -37,8 +37,10 @@ data class ControlConfig(
     val centerValue: Int = 1500,
     val servoCenterOffset: Int = 0, // 舵机中位偏移
     val throttleCurve: ThrottleCurve = ThrottleCurve.LINEAR,
-    val sendIntervalMs: Long = 40, // 25次/秒
-    val isTimerEnabled: Boolean = true, // 默认开启定时发送确保稳定性
+    val sendIntervalMs: Long = 40, // 操作时的发送间隔
+    val heartbeatIntervalMs: Long = 1000, // 心跳保活间隔，默认1秒
+    val inactivityTimeoutMs: Long = 1800000, // 超时断开时间，默认30分钟 (30 * 60 * 1000)
+    val isTimerEnabled: Boolean = false, // 改为默认关闭，只有操作才动作
     val isGyroEnabled: Boolean = false,
     val gyroSensitivity: Float = 1.0f,
     val enableVibration: Boolean = true // 极限位置震动反馈

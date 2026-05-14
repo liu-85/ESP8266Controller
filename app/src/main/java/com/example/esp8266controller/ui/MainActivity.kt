@@ -38,7 +38,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var openSettings: ImageButton
 
     private lateinit var gyroToggle: Button
-    private lateinit var timerToggle: Button
 
     private var connectionManager: ConnectionManager? = null
     private var appConfig: AppConfig? = null
@@ -48,7 +47,7 @@ class MainActivity : AppCompatActivity() {
     private val controlScope = CoroutineScope(Dispatchers.IO + controlJob)
     private var sendDataJob: Job? = null
     private var heartbeatJob: Job? = null
-    private var isFailsafeActive: Boolean = false
+    private var lastOperationTime: Long = 0
 
     private var leftY: Int = 1500
     private var leftX: Int = 1500
@@ -62,14 +61,15 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator
+        lastOperationTime = System.currentTimeMillis()
 
         loadConfig()
         initViews()
         setupListeners()
         setupJoystickProcessor()
         setupGyroController()
-        setupPeriodicSend()
         setupHeartbeat()
+        setupTimeoutCheck()
         applyTheme()
     }
 
@@ -77,27 +77,33 @@ class MainActivity : AppCompatActivity() {
         heartbeatJob?.cancel()
         heartbeatJob = controlScope.launch {
             while (isActive) {
-                delay(200)
+                val interval = appConfig?.controlConfig?.heartbeatIntervalMs ?: 1000
+                delay(interval)
                 if (connectionManager?.connectionState is ConnectionState.Connected) {
-                    sendControlData(isHeartbeat = true)
+                    // 心跳保活：发送不带指令的换行符或空包，ESP端收到后仅刷新连接计时
+                    connectionManager?.sendData("\n")
                 }
             }
         }
     }
 
-    private fun checkFailsafe() {
-        val manager = connectionManager
-        if (manager is WifiConnectionManager) {
-            if (manager.isFailsafeTriggered()) {
-                if (!isFailsafeActive) {
-                    isFailsafeActive = true
-                    runOnUiThread {
-                        Toast.makeText(this, "失控保护：设备无响应", Toast.LENGTH_SHORT).show()
-                        updateStatus("失控保护：停止发送")
+    private fun setupTimeoutCheck() {
+        controlScope.launch {
+            while (isActive) {
+                delay(10000) // 每10秒检查一次
+                val config = appConfig ?: continue
+                val timeout = config.controlConfig.inactivityTimeoutMs
+                if (timeout > 0 && (System.currentTimeMillis() - lastOperationTime) > timeout) {
+                    if (connectionManager?.connectionState is ConnectionState.Connected) {
+                        runOnUiThread {
+                            Toast.makeText(this@MainActivity, "长时间未操作，已自动断开连接", Toast.LENGTH_LONG).show()
+                        }
+                        connectionManager?.disconnect()
+                        runOnUiThread {
+                            updateConnectionStatusIcon(false)
+                        }
                     }
                 }
-            } else {
-                isFailsafeActive = false
             }
         }
     }
@@ -125,7 +131,6 @@ class MainActivity : AppCompatActivity() {
         openSettings = findViewById(R.id.openSettings)
 
         gyroToggle = findViewById(R.id.gyroToggle)
-        timerToggle = findViewById(R.id.timerToggle)
     }
 
     private fun applyTheme() {
@@ -143,23 +148,15 @@ class MainActivity : AppCompatActivity() {
             mainBtIcon.setTextColor(accentColor)
             openSettings.setColorFilter(accentColor)
             gyroToggle.setTextColor(accentColor)
-            timerToggle.setTextColor(accentColor)
             
             // Apply theme colors to all action buttons
             val buttons = listOf(
                 btn1, btn2, btn3, btn4, 
-                gyroToggle, timerToggle,
-                findViewById<Button>(R.id.btn_servo_left),
-                findViewById<Button>(R.id.btn_servo_center),
-                findViewById<Button>(R.id.btn_servo_right)
+                gyroToggle
             )
             
             buttons.forEach { btn ->
                 btn?.setTextColor(accentColor)
-                // If the theme is light (Theme 2 or 4), use dark text for contrast if needed
-                if (config.currentTheme == AppTheme.THEME_2 || config.currentTheme == AppTheme.THEME_4) {
-                    // Maybe adjust text color for light themes
-                }
             }
             
             // Update connection icons state
@@ -188,11 +185,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<Button>(R.id.btn_servo_left).setOnClickListener { sendImmediateCommand("SERVO_LEFT") }
-        findViewById<Button>(R.id.btn_servo_right).setOnClickListener { sendImmediateCommand("SERVO_RIGHT") }
-        findViewById<Button>(R.id.btn_servo_center).setOnClickListener { sendImmediateCommand("SERVO_CENTER") }
-        findViewById<Button>(R.id.btn_emergency_stop).setOnClickListener { sendImmediateCommand("BOTH_STOP") }
-
         gyroToggle.setOnClickListener {
             appConfig?.let { config ->
                 val newState = !config.controlConfig.isGyroEnabled
@@ -209,18 +201,6 @@ class MainActivity : AppCompatActivity() {
                     gyroController.stop()
                     leftJoystick.reset()
                 }
-            }
-        }
-
-        timerToggle.setOnClickListener {
-            appConfig?.let { config ->
-                val newState = !config.controlConfig.isTimerEnabled
-                val newConfig = config.copy(
-                    controlConfig = config.controlConfig.copy(isTimerEnabled = newState)
-                )
-                appConfig = newConfig
-                AppConfig.save(this, newConfig)
-                updateToggleButtons()
             }
         }
 
@@ -244,9 +224,6 @@ class MainActivity : AppCompatActivity() {
         appConfig?.let { config ->
             gyroToggle.text = "陀螺仪: ${if (config.controlConfig.isGyroEnabled) "ON" else "OFF"}"
             gyroToggle.isSelected = config.controlConfig.isGyroEnabled
-            
-            timerToggle.text = "定时发送: ${if (config.controlConfig.isTimerEnabled) "ON" else "OFF"}"
-            timerToggle.isSelected = config.controlConfig.isTimerEnabled
         }
     }
 
@@ -259,9 +236,7 @@ class MainActivity : AppCompatActivity() {
                 if (strength > 0.95f) triggerVibration()
                 
                 updateStatus("左摇杆: Y=$leftY, X=$leftX")
-                if (appConfig?.controlConfig?.isTimerEnabled == false) {
-                    sendControlData()
-                }
+                sendControlData()
             }
         }
 
@@ -272,9 +247,7 @@ class MainActivity : AppCompatActivity() {
             if (strength > 0.95f) triggerVibration()
             
             updateStatus("右摇杆: Y=$rightY, X=$rightX")
-            if (appConfig?.controlConfig?.isTimerEnabled == false) {
-                sendControlData()
-            }
+            sendControlData()
         }
     }
 
@@ -378,20 +351,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 updateStatus("陀螺仪控制: Y=$leftY, X=$leftX")
-                if (appConfig?.controlConfig?.isTimerEnabled == false) {
-                    sendControlData()
-                }
-            }
-        }
-    }
-
-    private fun setupPeriodicSend() {
-        sendDataJob = controlScope.launch {
-            while (isActive) {
-                if (appConfig?.controlConfig?.isTimerEnabled == true) {
-                    sendControlData()
-                }
-                delay(appConfig?.controlConfig?.sendIntervalMs ?: 50)
+                sendControlData()
             }
         }
     }
@@ -400,10 +360,7 @@ class MainActivity : AppCompatActivity() {
         val manager = connectionManager ?: return
         if (manager.connectionState !is ConnectionState.Connected) return
 
-        if (!isHeartbeat) {
-            checkFailsafe()
-            if (isFailsafeActive) return
-        }
+        lastOperationTime = System.currentTimeMillis()
 
         controlScope.launch {
             val command = dataProcessor?.formatCommand(

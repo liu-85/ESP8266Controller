@@ -79,11 +79,6 @@ class WifiConnectionManager(
         }
     }
 
-    fun isFailsafeTriggered(): Boolean {
-        if (_connectionState !is ConnectionState.Connected) return true
-        return (System.currentTimeMillis() - lastResponseTime) > 300
-    }
-
     private fun startReconnect() {
         if (reconnectJob?.isActive == true) return
         

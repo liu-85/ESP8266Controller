@@ -70,7 +70,9 @@ data class AppConfig(
                 servoCenterOffset = prefs.getInt("servo_center_offset", 0),
                 throttleCurve = ThrottleCurve.valueOf(prefs.getString("throttle_curve", ThrottleCurve.LINEAR.name) ?: ThrottleCurve.LINEAR.name),
                 sendIntervalMs = prefs.getLong("send_interval_ms", 40),
-                isTimerEnabled = prefs.getBoolean("is_timer_enabled", true),
+                heartbeatIntervalMs = prefs.getLong("heartbeat_interval_ms", 1000),
+                inactivityTimeoutMs = prefs.getLong("inactivity_timeout_ms", 1800000),
+                isTimerEnabled = prefs.getBoolean("is_timer_enabled", false),
                 isGyroEnabled = prefs.getBoolean("is_gyro_enabled", false),
                 gyroSensitivity = prefs.getFloat("gyro_sensitivity", 1.0f),
                 enableVibration = prefs.getBoolean("enable_vibration", true)
@@ -100,6 +102,8 @@ data class AppConfig(
                 putInt("servo_center_offset", config.controlConfig.servoCenterOffset)
                 putString("throttle_curve", config.controlConfig.throttleCurve.name)
                 putLong("send_interval_ms", config.controlConfig.sendIntervalMs)
+                putLong("heartbeat_interval_ms", config.controlConfig.heartbeatIntervalMs)
+                putLong("inactivity_timeout_ms", config.controlConfig.inactivityTimeoutMs)
                 putBoolean("is_timer_enabled", config.controlConfig.isTimerEnabled)
                 putBoolean("is_gyro_enabled", config.controlConfig.isGyroEnabled)
                 putFloat("gyro_sensitivity", config.controlConfig.gyroSensitivity)

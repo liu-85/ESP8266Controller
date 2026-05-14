@@ -20,7 +20,7 @@
         android:gravity="center_vertical"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- Connection Icons -->
+        <!-- Connection Icons (Top Left) -->
         <LinearLayout
             android:id="@+id/connection_icons_layout"
             android:layout_width="wrap_content"
@@ -57,7 +57,7 @@
 
         <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1"/>
 
-        <!-- Buttons and Switches -->
+        <!-- Top Right Controls -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
@@ -119,56 +119,10 @@
             app:layout_constraintBottom_toBottomOf="parent">
 
             <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/btn_emergency_stop"
-                android:layout_width="140dp"
-                android:layout_height="60dp"
-                android:text="🚨 急停"
-                android:textSize="18sp"
-                android:textColor="@color/white"
-                android:background="@drawable/button_selector"
-                android:backgroundTint="#FF4444"
-                android:layout_marginBottom="16dp"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_servo_left"
-                    android:layout_width="60dp"
-                    android:layout_height="40dp"
-                    android:text="左"
-                    style="@style/V7RCActionButton"
-                    android:layout_marginEnd="4dp"/>
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_servo_center"
-                    android:layout_width="60dp"
-                    android:layout_height="40dp"
-                    android:text="中"
-                    style="@style/V7RCActionButton"
-                    android:layout_marginEnd="4dp"/>
-                <androidx.appcompat.widget.AppCompatButton
-                    android:id="@+id/btn_servo_right"
-                    android:layout_width="60dp"
-                    android:layout_height="40dp"
-                    android:text="右"
-                    style="@style/V7RCActionButton"/>
-            </LinearLayout>
-
-            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/gyroToggle"
                 android:layout_width="140dp"
                 android:layout_height="wrap_content"
                 android:text="陀螺仪: OFF"
-                style="@style/V7RCActionButton"
-                android:layout_marginBottom="12dp"/>
-
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/timerToggle"
-                android:layout_width="140dp"
-                android:layout_height="wrap_content"
-                android:text="定时发送: OFF"
                 style="@style/V7RCActionButton"/>
         </LinearLayout>
 

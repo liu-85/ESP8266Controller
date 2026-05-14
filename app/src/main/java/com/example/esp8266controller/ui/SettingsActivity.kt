@@ -30,6 +30,11 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var sbGyroSensitivity: SeekBar
     private lateinit var tvGyroSensitivityValue: TextView
 
+    private lateinit var sbHeartbeat: SeekBar
+    private lateinit var tvHeartbeatVal: TextView
+    private lateinit var sbTimeout: SeekBar
+    private lateinit var tvTimeoutVal: TextView
+
     private lateinit var sbServoOffset: SeekBar
     private lateinit var tvServoOffsetVal: TextView
     private lateinit var rgThrottleCurve: RadioGroup
@@ -77,6 +82,11 @@ class SettingsActivity : AppCompatActivity() {
 
         sbGyroSensitivity = findViewById(R.id.sb_gyro_sensitivity)
         tvGyroSensitivityValue = findViewById(R.id.tv_gyro_sensitivity_value)
+        
+        sbHeartbeat = findViewById(R.id.sb_heartbeat)
+        tvHeartbeatVal = findViewById(R.id.tv_heartbeat_val)
+        sbTimeout = findViewById(R.id.sb_timeout)
+        tvTimeoutVal = findViewById(R.id.tv_timeout_val)
         
         sbServoOffset = findViewById(R.id.sb_servo_offset)
         tvServoOffsetVal = findViewById(R.id.tv_servo_offset_val)
@@ -141,6 +151,22 @@ class SettingsActivity : AppCompatActivity() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val value = progress / 100f
                 tvGyroSensitivityValue.text = String.format("%.1f", value)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        sbHeartbeat.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                tvHeartbeatVal.text = progress.toString()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        sbTimeout.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                tvTimeoutVal.text = progress.toString()
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
@@ -231,6 +257,13 @@ class SettingsActivity : AppCompatActivity() {
             sbGyroSensitivity.progress = (config.controlConfig.gyroSensitivity * 100).toInt()
             tvGyroSensitivityValue.text = String.format("%.1f", config.controlConfig.gyroSensitivity)
 
+            sbHeartbeat.progress = config.controlConfig.heartbeatIntervalMs.toInt()
+            tvHeartbeatVal.text = config.controlConfig.heartbeatIntervalMs.toString()
+            
+            val timeoutMinutes = (config.controlConfig.inactivityTimeoutMs / 60000).toInt()
+            sbTimeout.progress = timeoutMinutes
+            tvTimeoutVal.text = timeoutMinutes.toString()
+
             sbServoOffset.progress = config.controlConfig.servoCenterOffset + 100
             tvServoOffsetVal.text = config.controlConfig.servoCenterOffset.toString()
             
@@ -261,6 +294,8 @@ class SettingsActivity : AppCompatActivity() {
                 controlConfig = config.controlConfig.copy(
                     channelSources = channelSources,
                     gyroSensitivity = sbGyroSensitivity.progress / 100f,
+                    heartbeatIntervalMs = sbHeartbeat.progress.toLong(),
+                    inactivityTimeoutMs = sbTimeout.progress.toLong() * 60000,
                     servoCenterOffset = sbServoOffset.progress - 100,
                     throttleCurve = if (rbCurveExp.isChecked) ThrottleCurve.EXPONENTIAL else ThrottleCurve.LINEAR
                 ),

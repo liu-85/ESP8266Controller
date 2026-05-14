@@ -74,6 +74,20 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Keep-alive & Timeout Settings -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="心跳与超时设置" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                <TextView android:layout_width="100dp" android:layout_height="wrap_content" android:text="心跳间隔(ms)" style="@style/V7RCTextLabel"/>
+                <SeekBar android:id="@+id/sb_heartbeat" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:max="5000" android:progress="1000" android:progressTint="@color/v7rc_yellow" android:thumbTint="@color/v7rc_yellow"/>
+                <TextView android:id="@+id/tv_heartbeat_val" android:layout_width="50dp" android:layout_height="wrap_content" android:text="1000" android:textColor="@color/white" android:gravity="center"/>
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                <TextView android:layout_width="100dp" android:layout_height="wrap_content" android:text="超时停止(分)" style="@style/V7RCTextLabel"/>
+                <SeekBar android:id="@+id/sb_timeout" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:max="60" android:progress="30" android:progressTint="@color/v7rc_yellow" android:thumbTint="@color/v7rc_yellow"/>
+                <TextView android:id="@+id/tv_timeout_val" android:layout_width="50dp" android:layout_height="wrap_content" android:text="30" android:textColor="@color/white" android:gravity="center"/>
+            </LinearLayout>
+
             <!-- Status -->
             <TextView
                 android:id="@+id/connectionStatus"
