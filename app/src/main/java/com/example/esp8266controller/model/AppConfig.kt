@@ -38,12 +38,15 @@ data class AppConfig(
         }
 
         private fun loadControlConfig(prefs: SharedPreferences): ControlConfig {
-            val sourcesJson = prefs.getString("channel_sources", null)
+            val sourcesJson = prefs.getString("channel_sources_v2", null)
             val sources = if (sourcesJson != null) {
                 try {
-                    val arr = JSONArray(sourcesJson)
+                    val outerArr = JSONArray(sourcesJson)
                     (0 until 8).map { i ->
-                        ControlSource.valueOf(arr.getString(i))
+                        val innerArr = outerArr.getJSONArray(i)
+                        (0 until innerArr.length()).map { j ->
+                            ControlSource.valueOf(innerArr.getString(j))
+                        }
                     }
                 } catch (e: Exception) {
                     null
@@ -52,22 +55,25 @@ data class AppConfig(
 
             return ControlConfig(
                 channelSources = sources ?: listOf(
-                    ControlSource.LEFT_JOYSTICK_Y,
-                    ControlSource.RIGHT_JOYSTICK_X,
-                    ControlSource.NONE,
-                    ControlSource.NONE,
-                    ControlSource.NONE,
-                    ControlSource.NONE,
-                    ControlSource.NONE,
-                    ControlSource.NONE
+                    listOf(ControlSource.LEFT_JOYSTICK_Y),
+                    listOf(ControlSource.RIGHT_JOYSTICK_X),
+                    listOf(ControlSource.NONE),
+                    listOf(ControlSource.NONE),
+                    listOf(ControlSource.NONE),
+                    listOf(ControlSource.NONE),
+                    listOf(ControlSource.NONE),
+                    listOf(ControlSource.NONE)
                 ),
                 minChannelValue = prefs.getInt("min_channel_value", 1000),
                 maxChannelValue = prefs.getInt("max_channel_value", 2000),
                 centerValue = prefs.getInt("center_value", 1500),
-                sendIntervalMs = prefs.getLong("send_interval_ms", 50),
-                isTimerEnabled = prefs.getBoolean("is_timer_enabled", false),
+                servoCenterOffset = prefs.getInt("servo_center_offset", 0),
+                throttleCurve = ThrottleCurve.valueOf(prefs.getString("throttle_curve", ThrottleCurve.LINEAR.name) ?: ThrottleCurve.LINEAR.name),
+                sendIntervalMs = prefs.getLong("send_interval_ms", 40),
+                isTimerEnabled = prefs.getBoolean("is_timer_enabled", true),
                 isGyroEnabled = prefs.getBoolean("is_gyro_enabled", false),
-                gyroSensitivity = prefs.getFloat("gyro_sensitivity", 1.0f)
+                gyroSensitivity = prefs.getFloat("gyro_sensitivity", 1.0f),
+                enableVibration = prefs.getBoolean("enable_vibration", true)
             )
         }
 
@@ -80,17 +86,24 @@ data class AppConfig(
                 putString("bluetooth_address", config.connectionConfig.bluetoothAddress)
                 putString("bluetooth_name", config.connectionConfig.bluetoothName)
 
-                val sourcesJson = JSONArray()
-                config.controlConfig.channelSources.forEach { sourcesJson.put(it.name) }
-                putString("channel_sources", sourcesJson.toString())
+                val outerArr = JSONArray()
+                config.controlConfig.channelSources.forEach { sources ->
+                    val innerArr = JSONArray()
+                    sources.forEach { innerArr.put(it.name) }
+                    outerArr.put(innerArr)
+                }
+                putString("channel_sources_v2", outerArr.toString())
 
                 putInt("min_channel_value", config.controlConfig.minChannelValue)
                 putInt("max_channel_value", config.controlConfig.maxChannelValue)
                 putInt("center_value", config.controlConfig.centerValue)
+                putInt("servo_center_offset", config.controlConfig.servoCenterOffset)
+                putString("throttle_curve", config.controlConfig.throttleCurve.name)
                 putLong("send_interval_ms", config.controlConfig.sendIntervalMs)
                 putBoolean("is_timer_enabled", config.controlConfig.isTimerEnabled)
                 putBoolean("is_gyro_enabled", config.controlConfig.isGyroEnabled)
                 putFloat("gyro_sensitivity", config.controlConfig.gyroSensitivity)
+                putBoolean("enable_vibration", config.controlConfig.enableVibration)
 
                 putString("app_theme", config.currentTheme.name)
             }.apply()

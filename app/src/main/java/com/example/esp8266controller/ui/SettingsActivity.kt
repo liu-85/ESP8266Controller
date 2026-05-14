@@ -30,16 +30,23 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var sbGyroSensitivity: SeekBar
     private lateinit var tvGyroSensitivityValue: TextView
 
+    private lateinit var sbServoOffset: SeekBar
+    private lateinit var tvServoOffsetVal: TextView
+    private lateinit var rgThrottleCurve: RadioGroup
+    private lateinit var rbCurveLinear: RadioButton
+    private lateinit var rbCurveExp: RadioButton
+
     private lateinit var theme1Btn: Button
     private lateinit var theme2Btn: Button
     private lateinit var theme3Btn: Button
     private lateinit var theme4Btn: Button
 
-    private lateinit var spinners: List<Spinner>
+    private lateinit var spinners: List<View> // Changed to View to handle multi-select logic
 
     private var appConfig: AppConfig? = null
     private var selectedTheme: AppTheme = AppTheme.THEME_1
     private var connectionType: ConnectionType = ConnectionType.WIFI
+    private var channelSources: MutableList<MutableList<ControlSource>> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -70,6 +77,12 @@ class SettingsActivity : AppCompatActivity() {
 
         sbGyroSensitivity = findViewById(R.id.sb_gyro_sensitivity)
         tvGyroSensitivityValue = findViewById(R.id.tv_gyro_sensitivity_value)
+        
+        sbServoOffset = findViewById(R.id.sb_servo_offset)
+        tvServoOffsetVal = findViewById(R.id.tv_servo_offset_val)
+        rgThrottleCurve = findViewById(R.id.rg_throttle_curve)
+        rbCurveLinear = findViewById(R.id.rb_curve_linear)
+        rbCurveExp = findViewById(R.id.rb_curve_exp)
 
         theme1Btn = findViewById(R.id.theme1Btn)
         theme2Btn = findViewById(R.id.theme2Btn)
@@ -107,6 +120,18 @@ class SettingsActivity : AppCompatActivity() {
             connectionStatus.text = "配置已储存"
         }
 
+        val onTextChange = object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { updateConnectionUI() }
+            override fun afterTextChanged(s: android.text.Editable?) {}
+        }
+        ipInput.addTextChangedListener(onTextChange)
+        portInput.addTextChangedListener(onTextChange)
+
+        connectionStatus.setOnClickListener {
+            connectionStatus.text = "正在尝试连接..."
+        }
+
         theme1Btn.setOnClickListener { selectedTheme = AppTheme.THEME_1; updateThemeUI() }
         theme2Btn.setOnClickListener { selectedTheme = AppTheme.THEME_2; updateThemeUI() }
         theme3Btn.setOnClickListener { selectedTheme = AppTheme.THEME_3; updateThemeUI() }
@@ -121,6 +146,19 @@ class SettingsActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        sbServoOffset.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val value = progress - 100
+                tvServoOffsetVal.text = value.toString()
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        spinners.forEachIndexed { index, view ->
+            view.setOnClickListener { showMultiSelectDialog(index) }
+        }
+
         closeSettings.setOnClickListener {
             saveConfig()
             setResult(RESULT_OK)
@@ -128,10 +166,52 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
+    private fun showMultiSelectDialog(channelIndex: Int) {
+        val options = ControlSource.values()
+        val optionLabels = options.map { it.name }.toTypedArray()
+        val currentSources = channelSources.getOrNull(channelIndex) ?: mutableListOf(ControlSource.NONE)
+        val checkedItems = options.map { currentSources.contains(it) }.toBooleanArray()
+
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("选择 CH${channelIndex + 1} 来源 (多选)")
+            .setMultiChoiceItems(optionLabels, checkedItems) { _, which, isChecked ->
+                checkedItems[which] = isChecked
+            }
+            .setPositiveButton("确定") { _, _ ->
+                val newSources = mutableListOf<ControlSource>()
+                checkedItems.forEachIndexed { i, checked ->
+                    if (checked) newSources.add(options[i])
+                }
+                if (newSources.isEmpty()) newSources.add(ControlSource.NONE)
+                channelSources[channelIndex] = newSources
+                updateChannelTextView(channelIndex)
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
+    private fun updateChannelTextView(index: Int) {
+        val view = spinners[index]
+        if (view is TextView) {
+            view.text = channelSources[index].joinToString(", ") { it.name }
+        }
+    }
+
     private fun updateConnectionUI() {
         wifiModeBtn.isSelected = connectionType == ConnectionType.WIFI
         btModeBtn.isSelected = connectionType == ConnectionType.BLUETOOTH
         wifiSettings.visibility = if (connectionType == ConnectionType.WIFI) View.VISIBLE else View.GONE
+        
+        // Update connection status text based on input
+        val ip = ipInput.text.toString()
+        val port = portInput.text.toString()
+        if (ip.isNotEmpty() && port.isNotEmpty()) {
+            connectionStatus.text = "配置就绪: $ip:$port (点击尝试连接)"
+            connectionStatus.isEnabled = true
+        } else {
+            connectionStatus.text = "请先设置 IP 和 端口"
+            connectionStatus.isEnabled = false
+        }
     }
 
     private fun updateThemeUI() {
@@ -151,10 +231,18 @@ class SettingsActivity : AppCompatActivity() {
             sbGyroSensitivity.progress = (config.controlConfig.gyroSensitivity * 100).toInt()
             tvGyroSensitivityValue.text = String.format("%.1f", config.controlConfig.gyroSensitivity)
 
-            config.controlConfig.channelSources.forEachIndexed { index, source ->
-                if (index < spinners.size) {
-                    spinners[index].setSelection(source.ordinal)
-                }
+            sbServoOffset.progress = config.controlConfig.servoCenterOffset + 100
+            tvServoOffsetVal.text = config.controlConfig.servoCenterOffset.toString()
+            
+            if (config.controlConfig.throttleCurve == ThrottleCurve.EXPONENTIAL) {
+                rbCurveExp.isChecked = true
+            } else {
+                rbCurveLinear.isChecked = true
+            }
+
+            channelSources = config.controlConfig.channelSources.map { it.toMutableList() }.toMutableList()
+            spinners.forEachIndexed { index, _ ->
+                updateChannelTextView(index)
             }
 
             updateConnectionUI()
@@ -164,8 +252,6 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun saveConfig() {
         appConfig?.let { config ->
-            val newSources = spinners.map { ControlSource.values()[it.selectedItemPosition] }
-            
             val newConfig = config.copy(
                 connectionConfig = config.connectionConfig.copy(
                     connectionType = connectionType,
@@ -173,8 +259,10 @@ class SettingsActivity : AppCompatActivity() {
                     wifiPort = portInput.text.toString().toIntOrNull() ?: 2000
                 ),
                 controlConfig = config.controlConfig.copy(
-                    channelSources = newSources,
-                    gyroSensitivity = sbGyroSensitivity.progress / 100f
+                    channelSources = channelSources,
+                    gyroSensitivity = sbGyroSensitivity.progress / 100f,
+                    servoCenterOffset = sbServoOffset.progress - 100,
+                    throttleCurve = if (rbCurveExp.isChecked) ThrottleCurve.EXPONENTIAL else ThrottleCurve.LINEAR
                 ),
                 currentTheme = selectedTheme
             )

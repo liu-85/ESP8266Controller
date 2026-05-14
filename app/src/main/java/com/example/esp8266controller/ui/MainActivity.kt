@@ -47,15 +47,21 @@ class MainActivity : AppCompatActivity() {
     private val controlJob = SupervisorJob()
     private val controlScope = CoroutineScope(Dispatchers.IO + controlJob)
     private var sendDataJob: Job? = null
+    private var heartbeatJob: Job? = null
+    private var isFailsafeActive: Boolean = false
 
     private var leftY: Int = 1500
     private var leftX: Int = 1500
     private var rightY: Int = 1500
     private var rightX: Int = 1500
 
+    private lateinit var vibrator: android.os.Vibrator
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        vibrator = getSystemService(android.content.Context.VIBRATOR_SERVICE) as android.os.Vibrator
 
         loadConfig()
         initViews()
@@ -63,7 +69,37 @@ class MainActivity : AppCompatActivity() {
         setupJoystickProcessor()
         setupGyroController()
         setupPeriodicSend()
+        setupHeartbeat()
         applyTheme()
+    }
+
+    private fun setupHeartbeat() {
+        heartbeatJob?.cancel()
+        heartbeatJob = controlScope.launch {
+            while (isActive) {
+                delay(200)
+                if (connectionManager?.connectionState is ConnectionState.Connected) {
+                    sendControlData(isHeartbeat = true)
+                }
+            }
+        }
+    }
+
+    private fun checkFailsafe() {
+        val manager = connectionManager
+        if (manager is WifiConnectionManager) {
+            if (manager.isFailsafeTriggered()) {
+                if (!isFailsafeActive) {
+                    isFailsafeActive = true
+                    runOnUiThread {
+                        Toast.makeText(this, "失控保护：设备无响应", Toast.LENGTH_SHORT).show()
+                        updateStatus("失控保护：停止发送")
+                    }
+                }
+            } else {
+                isFailsafeActive = false
+            }
+        }
     }
 
     private fun loadConfig() {
@@ -109,6 +145,23 @@ class MainActivity : AppCompatActivity() {
             gyroToggle.setTextColor(accentColor)
             timerToggle.setTextColor(accentColor)
             
+            // Apply theme colors to all action buttons
+            val buttons = listOf(
+                btn1, btn2, btn3, btn4, 
+                gyroToggle, timerToggle,
+                findViewById<Button>(R.id.btn_servo_left),
+                findViewById<Button>(R.id.btn_servo_center),
+                findViewById<Button>(R.id.btn_servo_right)
+            )
+            
+            buttons.forEach { btn ->
+                btn?.setTextColor(accentColor)
+                // If the theme is light (Theme 2 or 4), use dark text for contrast if needed
+                if (config.currentTheme == AppTheme.THEME_2 || config.currentTheme == AppTheme.THEME_4) {
+                    // Maybe adjust text color for light themes
+                }
+            }
+            
             // Toggle icons based on connection type
             if (config.connectionConfig.connectionType == ConnectionType.WIFI) {
                 mainWifiIcon.visibility = View.VISIBLE
@@ -124,6 +177,11 @@ class MainActivity : AppCompatActivity() {
         openSettings.setOnClickListener {
             startActivityForResult(Intent(this, SettingsActivity::class.java), SETTINGS_REQUEST_CODE)
         }
+
+        findViewById<Button>(R.id.btn_servo_left).setOnClickListener { sendImmediateCommand("SERVO_LEFT") }
+        findViewById<Button>(R.id.btn_servo_right).setOnClickListener { sendImmediateCommand("SERVO_RIGHT") }
+        findViewById<Button>(R.id.btn_servo_center).setOnClickListener { sendImmediateCommand("SERVO_CENTER") }
+        findViewById<Button>(R.id.btn_emergency_stop).setOnClickListener { sendImmediateCommand("BOTH_STOP") }
 
         gyroToggle.setOnClickListener {
             appConfig?.let { config ->
@@ -187,6 +245,9 @@ class MainActivity : AppCompatActivity() {
             if (appConfig?.controlConfig?.isGyroEnabled == false) {
                 leftY = dataProcessor!!.mapToChannelValue(angle, strength, true)
                 leftX = dataProcessor!!.mapToChannelValue(angle, strength, false)
+                
+                if (strength > 0.95f) triggerVibration()
+                
                 updateStatus("左摇杆: Y=$leftY, X=$leftX")
                 if (appConfig?.controlConfig?.isTimerEnabled == false) {
                     sendControlData()
@@ -197,6 +258,9 @@ class MainActivity : AppCompatActivity() {
         rightJoystick.setOnJoystickMoveListener { angle, strength ->
             rightY = dataProcessor!!.mapToChannelValue(angle, strength, true)
             rightX = dataProcessor!!.mapToChannelValue(angle, strength, false)
+            
+            if (strength > 0.95f) triggerVibration()
+            
             updateStatus("右摇杆: Y=$rightY, X=$rightX")
             if (appConfig?.controlConfig?.isTimerEnabled == false) {
                 sendControlData()
@@ -246,15 +310,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun sendControlData() {
+    private fun sendControlData(isHeartbeat: Boolean = false) {
         val manager = connectionManager ?: return
         if (manager.connectionState !is ConnectionState.Connected) return
+
+        if (!isHeartbeat) {
+            checkFailsafe()
+            if (isFailsafeActive) return
+        }
 
         controlScope.launch {
             val command = dataProcessor?.formatCommand(
                 leftY, leftX,
                 rightY, rightX,
-                listOf(btn1.isPressed, btn2.isPressed, btn3.isPressed, btn4.isPressed),
+                listOf(btn1.isSelected, btn2.isSelected, btn3.isSelected, btn4.isSelected),
                 listOf(switch1.isChecked, switch2.isChecked)
             )
             command?.let { payload ->
@@ -262,6 +331,27 @@ class MainActivity : AppCompatActivity() {
                 withContext(Dispatchers.Main) {
                     updateConnectionStatusIcon(true)
                 }
+            }
+        }
+    }
+
+    private fun sendImmediateCommand(cmd: String) {
+        val manager = connectionManager ?: return
+        if (manager.connectionState !is ConnectionState.Connected) return
+
+        controlScope.launch {
+            val payload = dataProcessor?.formatButtonCommand(cmd)
+            payload?.let { manager.sendData(it) }
+        }
+    }
+
+    private fun triggerVibration() {
+        if (appConfig?.controlConfig?.enableVibration == true) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                vibrator.vibrate(android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(50)
             }
         }
     }

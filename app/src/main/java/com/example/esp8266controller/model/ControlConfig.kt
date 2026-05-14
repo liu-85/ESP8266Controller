@@ -14,24 +14,32 @@ enum class ControlSource {
     NONE               // 中性值 1500
 }
 
+enum class ThrottleCurve {
+    LINEAR,     // 线性
+    EXPONENTIAL // 指数
+}
+
 data class ControlConfig(
     // 8个通道的来源配置，默认：
     // CH1: 左Y, CH2: 右X, 其他: NONE
-    val channelSources: List<ControlSource> = listOf(
-        ControlSource.LEFT_JOYSTICK_Y,  // CH1
-        ControlSource.RIGHT_JOYSTICK_X, // CH2
-        ControlSource.NONE,             // CH3
-        ControlSource.NONE,             // CH4
-        ControlSource.NONE,             // CH5
-        ControlSource.NONE,             // CH6
-        ControlSource.NONE,             // CH7
-        ControlSource.NONE              // CH8
+    val channelSources: List<List<ControlSource>> = listOf(
+        listOf(ControlSource.LEFT_JOYSTICK_Y),  // CH1
+        listOf(ControlSource.RIGHT_JOYSTICK_X), // CH2
+        listOf(ControlSource.NONE),             // CH3
+        listOf(ControlSource.NONE),             // CH4
+        listOf(ControlSource.NONE),             // CH5
+        listOf(ControlSource.NONE),             // CH6
+        listOf(ControlSource.NONE),             // CH7
+        listOf(ControlSource.NONE)              // CH8
     ),
     val minChannelValue: Int = 1000,
     val maxChannelValue: Int = 2000,
     val centerValue: Int = 1500,
-    val sendIntervalMs: Long = 50, // UI.txt 建议定时发送，默认 50ms
-    val isTimerEnabled: Boolean = false,
+    val servoCenterOffset: Int = 0, // 舵机中位偏移
+    val throttleCurve: ThrottleCurve = ThrottleCurve.LINEAR,
+    val sendIntervalMs: Long = 40, // 25次/秒
+    val isTimerEnabled: Boolean = true, // 默认开启定时发送确保稳定性
     val isGyroEnabled: Boolean = false,
-    val gyroSensitivity: Float = 1.0f
+    val gyroSensitivity: Float = 1.0f,
+    val enableVibration: Boolean = true // 极限位置震动反馈
 )
