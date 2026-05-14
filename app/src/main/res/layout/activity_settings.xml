@@ -163,12 +163,12 @@
     <RadioGroup android:id="@+id/rg_control_mode" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
     <RadioButton android:id="@+id/rb_separate" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
     <RadioButton android:id="@+id/rb_mixed" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
-    <LinearLayout android:id="@+id/mixed_channels_layout" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <LinearLayout android:id="@+id/mixed_channels_layout" android:layout_width="0dp" android:layout_height="0dp" android:orientation="vertical" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
     <Spinner android:id="@+id/spinner_mixed_ch1" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
     <Spinner android:id="@+id/spinner_mixed_ch2" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
     <EditText android:id="@+id/et_throttle_template" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
     <EditText android:id="@+id/et_steering_template" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
     <Button android:id="@+id/btn_scan_bluetooth" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
-    <LinearLayout android:id="@+id/wifi_settings_layout" android:layout_width="0dp" android:layout_height="0dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
+    <LinearLayout android:id="@+id/wifi_settings_layout" android:layout_width="0dp" android:layout_height="0dp" android:orientation="vertical" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
