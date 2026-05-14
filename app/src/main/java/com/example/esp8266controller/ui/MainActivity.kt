@@ -156,14 +156,18 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Button clicks also trigger immediate send if timer is off
-        val onButtonClick = { sendControlData() }
-        btn1.setOnClickListener { onButtonClick() }
-        btn2.setOnClickListener { onButtonClick() }
-        btn3.setOnClickListener { onButtonClick() }
-        btn4.setOnClickListener { onButtonClick() }
-        switch1.setOnCheckedChangeListener { _, _ -> onButtonClick() }
-        switch2.setOnCheckedChangeListener { _, _ -> onButtonClick() }
+        // Button clicks toggle state and trigger immediate send if timer is off
+        val onButtonClick = { view: View -> 
+            view.isSelected = !view.isSelected
+            sendControlData() 
+        }
+        btn1.setOnClickListener { onButtonClick(it) }
+        btn2.setOnClickListener { onButtonClick(it) }
+        btn3.setOnClickListener { onButtonClick(it) }
+        btn4.setOnClickListener { onButtonClick(it) }
+        
+        switch1.setOnCheckedChangeListener { _, _ -> sendControlData() }
+        switch2.setOnCheckedChangeListener { _, _ -> sendControlData() }
 
         updateToggleButtons()
     }

@@ -54,8 +54,8 @@
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <Button android:id="@+id/btn1" android:layout_width="wrap_content" android:layout_height="40dp" android:text="按键1" style="@style/V7RCActionButton" android:layout_marginEnd="8dp"/>
-            <Button android:id="@+id/btn2" android:layout_width="wrap_content" android:layout_height="40dp" android:text="按键2" style="@style/V7RCActionButton" android:layout_marginEnd="8dp"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btn1" android:layout_width="wrap_content" android:layout_height="40dp" android:text="按键1" style="@style/V7RCActionButton" android:layout_marginEnd="8dp"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btn2" android:layout_width="wrap_content" android:layout_height="40dp" android:text="按键2" style="@style/V7RCActionButton" android:layout_marginEnd="8dp"/>
 
             <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:gravity="center" android:layout_marginEnd="8dp">
                 <androidx.appcompat.widget.SwitchCompat android:id="@+id/switch1" android:layout_width="wrap_content" android:layout_height="wrap_content" />
@@ -67,8 +67,8 @@
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="开关2" android:textColor="@color/white" android:textSize="10sp"/>
             </LinearLayout>
 
-            <Button android:id="@+id/btn3" android:layout_width="wrap_content" android:layout_height="40dp" android:text="按键3" style="@style/V7RCActionButton" android:layout_marginEnd="8dp"/>
-            <Button android:id="@+id/btn4" android:layout_width="wrap_content" android:layout_height="40dp" android:text="按键4" style="@style/V7RCActionButton" android:layout_marginEnd="8dp"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btn3" android:layout_width="wrap_content" android:layout_height="40dp" android:text="按键3" style="@style/V7RCActionButton" android:layout_marginEnd="8dp"/>
+            <androidx.appcompat.widget.AppCompatButton android:id="@+id/btn4" android:layout_width="wrap_content" android:layout_height="40dp" android:text="按键4" style="@style/V7RCActionButton" android:layout_marginEnd="8dp"/>
 
             <ImageButton
                 android:id="@+id/openSettings"
@@ -108,7 +108,7 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/gyroToggle"
                 android:layout_width="140dp"
                 android:layout_height="wrap_content"
@@ -116,7 +116,7 @@
                 style="@style/V7RCActionButton"
                 android:layout_marginBottom="16dp"/>
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/timerToggle"
                 android:layout_width="140dp"
                 android:layout_height="wrap_content"
