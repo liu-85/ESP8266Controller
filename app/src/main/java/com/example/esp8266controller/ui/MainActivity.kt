@@ -19,6 +19,11 @@ import com.example.esp8266controller.model.*
 import com.example.esp8266controller.sensor.*
 import kotlinx.coroutines.*
 
+import androidx.core.app.ActivityCompat
+import android.content.pm.PackageManager
+import android.os.Build
+import android.Manifest
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mainLayout: View
@@ -336,6 +341,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun reconnect() {
+        val config = appConfig ?: return
+        
+        // Handle Bluetooth permissions for Android 12+
+        if (config.connectionConfig.connectionType == ConnectionType.BLUETOOTH && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val permissions = arrayOf(
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN
+            )
+            val missingPermissions = permissions.filter {
+                ActivityCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+            }
+            if (missingPermissions.isNotEmpty()) {
+                ActivityCompat.requestPermissions(this, missingPermissions.toTypedArray(), BT_PERMISSION_REQUEST_CODE)
+                return
+            }
+        }
+
         lifecycleScope.launch {
             connectionManager?.disconnect()
             val config = appConfig ?: return@launch
@@ -499,7 +521,20 @@ class MainActivity : AppCompatActivity() {
         gyroController.stop()
     }
 
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == BT_PERMISSION_REQUEST_CODE) {
+            if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+                reconnect()
+            } else {
+                updateStatus("连接失败: 缺少蓝牙权限")
+                Toast.makeText(this, "需要蓝牙权限才能连接设备", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     companion object {
         private const val SETTINGS_REQUEST_CODE = 100
+        private const val BT_PERMISSION_REQUEST_CODE = 101
     }
 }
