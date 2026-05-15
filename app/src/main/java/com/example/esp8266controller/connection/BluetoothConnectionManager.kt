@@ -68,15 +68,60 @@ class BluetoothConnectionManager(
                 return@withContext Result.failure(Exception("未找到设备"))
             }
 
+            // Cancel discovery as it slows down connection
+            if (bluetoothAdapter.isDiscovering) {
+                bluetoothAdapter.cancelDiscovery()
+            }
+
             deviceName = device.name ?: deviceAddress
 
-            val newSocket = device.createRfcommSocketToServiceRecord(SPP_UUID)
-            newSocket.connect()
-            bluetoothSocket = newSocket
-            outputStream = OutputStreamWriter(newSocket.outputStream, StandardCharsets.UTF_8)
+            var connected = false
+            var lastException: Exception? = null
 
-            _connectionState = ConnectionState.Connected(deviceName)
-            Result.success(Unit)
+            // Try 1: Secure RFCOMM
+            try {
+                val socket = device.createRfcommSocketToServiceRecord(SPP_UUID)
+                socket.connect()
+                bluetoothSocket = socket
+                connected = true
+            } catch (e: Exception) {
+                lastException = e
+            }
+
+            // Try 2: Insecure RFCOMM if Secure failed
+            if (!connected) {
+                try {
+                    val socket = device.createInsecureRfcommSocketToServiceRecord(SPP_UUID)
+                    socket.connect()
+                    bluetoothSocket = socket
+                    connected = true
+                } catch (e: Exception) {
+                    lastException = e
+                }
+            }
+
+            // Try 3: Reflection fallback (Port 1)
+            if (!connected) {
+                try {
+                    val method = device.javaClass.getMethod("createRfcommSocket", Int::class.javaPrimitiveType)
+                    val socket = method.invoke(device, 1) as BluetoothSocket
+                    socket.connect()
+                    bluetoothSocket = socket
+                    connected = true
+                } catch (e: Exception) {
+                    lastException = e
+                }
+            }
+
+            if (connected && bluetoothSocket != null) {
+                outputStream = OutputStreamWriter(bluetoothSocket!!.outputStream, StandardCharsets.UTF_8)
+                _connectionState = ConnectionState.Connected(deviceName)
+                Result.success(Unit)
+            } else {
+                val errorMsg = lastException?.message ?: "所有连接尝试均失败"
+                _connectionState = ConnectionState.Error(errorMsg)
+                Result.failure(lastException ?: Exception(errorMsg))
+            }
         } catch (e: Exception) {
             _connectionState = ConnectionState.Error(e.message ?: "连接失败")
             disconnect()
