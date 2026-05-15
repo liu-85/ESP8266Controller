@@ -3,6 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/settings_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/v7rc_bg"
@@ -52,6 +53,7 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
+            android:id="@+id/settings_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
@@ -93,17 +95,25 @@
             </LinearLayout>
 
             <!-- Keep-alive & Timeout Settings -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="心跳与超时设置" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
-                <TextView android:layout_width="100dp" android:layout_height="wrap_content" android:text="心跳间隔(ms)" style="@style/V7RCTextLabel"/>
-                <SeekBar android:id="@+id/sb_heartbeat" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:max="5000" android:progress="1000" android:progressTint="@color/v7rc_yellow" android:thumbTint="@color/v7rc_yellow"/>
-                <TextView android:id="@+id/tv_heartbeat_val" android:layout_width="50dp" android:layout_height="wrap_content" android:text="1000" android:textColor="@color/white" android:gravity="center"/>
-            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/section_heartbeat"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:layout_marginBottom="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="心跳与超时设置" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
+                    <TextView android:layout_width="100dp" android:layout_height="wrap_content" android:text="心跳间隔(ms)" style="@style/V7RCTextLabel"/>
+                    <SeekBar android:id="@+id/sb_heartbeat" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:max="5000" android:progress="1000" android:progressTint="@color/v7rc_yellow" android:thumbTint="@color/v7rc_yellow"/>
+                    <TextView android:id="@+id/tv_heartbeat_val" android:layout_width="50dp" android:layout_height="wrap_content" android:text="1000" android:textColor="@color/white" android:gravity="center"/>
+                </LinearLayout>
 
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
-                <TextView android:layout_width="100dp" android:layout_height="wrap_content" android:text="超时停止(分)" style="@style/V7RCTextLabel"/>
-                <SeekBar android:id="@+id/sb_timeout" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:max="60" android:progress="30" android:progressTint="@color/v7rc_yellow" android:thumbTint="@color/v7rc_yellow"/>
-                <TextView android:id="@+id/tv_timeout_val" android:layout_width="50dp" android:layout_height="wrap_content" android:text="30" android:textColor="@color/white" android:gravity="center"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                    <TextView android:layout_width="100dp" android:layout_height="wrap_content" android:text="超时停止(分)" style="@style/V7RCTextLabel"/>
+                    <SeekBar android:id="@+id/sb_timeout" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:max="60" android:progress="30" android:progressTint="@color/v7rc_yellow" android:thumbTint="@color/v7rc_yellow"/>
+                    <TextView android:id="@+id/tv_timeout_val" android:layout_width="50dp" android:layout_height="wrap_content" android:text="30" android:textColor="@color/white" android:gravity="center"/>
+                </LinearLayout>
             </LinearLayout>
 
             <!-- Status -->
@@ -119,118 +129,155 @@
                 android:layout_marginBottom="16dp"/>
 
             <!-- Theme Selection -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="背景主题切换" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
-            <GridLayout
+            <LinearLayout
+                android:id="@+id/section_theme"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:columnCount="2"
-                android:rowCount="2"
+                android:orientation="vertical"
+                android:padding="12dp"
                 android:layout_marginBottom="16dp">
-                <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme1Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="霓虹蓝粉" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
-                <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme2Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="简约白" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
-                <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme3Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="iOS 风格" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
-                <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme4Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="清新绿蓝" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
-            </GridLayout>
-
-            <!-- Channel Mapping -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="通道来源映射 (点击设置多选)" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
-            <GridLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="1">
-                
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
-                    <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH1" style="@style/V7RCTextLabel"/>
-                    <TextView android:id="@+id/spinner_ch1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
-                </LinearLayout>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
-                    <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH2" style="@style/V7RCTextLabel"/>
-                    <TextView android:id="@+id/spinner_ch2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
-                </LinearLayout>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
-                    <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH3" style="@style/V7RCTextLabel"/>
-                    <TextView android:id="@+id/spinner_ch3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
-                </LinearLayout>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
-                    <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH4" style="@style/V7RCTextLabel"/>
-                    <TextView android:id="@+id/spinner_ch4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
-                </LinearLayout>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
-                    <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH5" style="@style/V7RCTextLabel"/>
-                    <TextView android:id="@+id/spinner_ch5" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
-                </LinearLayout>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
-                    <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH6" style="@style/V7RCTextLabel"/>
-                    <TextView android:id="@+id/spinner_ch6" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
-                </LinearLayout>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
-                    <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH7" style="@style/V7RCTextLabel"/>
-                    <TextView android:id="@+id/spinner_ch7" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
-                </LinearLayout>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
-                    <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH8" style="@style/V7RCTextLabel"/>
-                    <TextView android:id="@+id/spinner_ch8" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
-                </LinearLayout>
-            </GridLayout>
-
-            <!-- Servo & Throttle Settings -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="操控高级设置" style="@style/V7RCTextLabel" android:layout_marginTop="16dp" android:layout_marginBottom="8dp"/>
-            
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="8dp">
-                <TextView android:layout_width="100dp" android:layout_height="wrap_content" android:text="舵机中位修正" style="@style/V7RCTextLabel"/>
-                <SeekBar android:id="@+id/sb_servo_offset" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:max="200" android:progress="100" android:progressTint="@color/v7rc_yellow" android:thumbTint="@color/v7rc_yellow"/>
-                <TextView android:id="@+id/tv_servo_offset_val" android:layout_width="40dp" android:layout_height="wrap_content" android:text="0" android:textColor="@color/white" android:gravity="center"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="背景主题切换" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="2"
+                    android:rowCount="2">
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme1Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="霓虹蓝粉" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme2Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="简约白" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme3Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="iOS 风格" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme4Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="清新绿蓝" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
+                </GridLayout>
             </LinearLayout>
 
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
-                <TextView android:layout_width="100dp" android:layout_height="wrap_content" android:text="油门曲线" style="@style/V7RCTextLabel"/>
-                <RadioGroup android:id="@+id/rg_throttle_curve" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="horizontal">
+            <!-- Channel Mapping -->
+            <LinearLayout
+                android:id="@+id/section_mapping"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:layout_marginBottom="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="通道来源映射 (点击设置多选)" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                <GridLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="1">
+                    
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH1" style="@style/V7RCTextLabel"/>
+                        <TextView android:id="@+id/spinner_ch1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH2" style="@style/V7RCTextLabel"/>
+                        <TextView android:id="@+id/spinner_ch2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH3" style="@style/V7RCTextLabel"/>
+                        <TextView android:id="@+id/spinner_ch3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH4" style="@style/V7RCTextLabel"/>
+                        <TextView android:id="@+id/spinner_ch4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH5" style="@style/V7RCTextLabel"/>
+                        <TextView android:id="@+id/spinner_ch5" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH6" style="@style/V7RCTextLabel"/>
+                        <TextView android:id="@+id/spinner_ch6" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH7" style="@style/V7RCTextLabel"/>
+                        <TextView android:id="@+id/spinner_ch7" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
+                    </LinearLayout>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="4dp">
+                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="CH8" style="@style/V7RCTextLabel"/>
+                        <TextView android:id="@+id/spinner_ch8" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="NONE" android:clickable="true" android:focusable="true"/>
+                    </LinearLayout>
+                </GridLayout>
+            </LinearLayout>
+
+            <!-- Throttle Curve -->
+            <LinearLayout
+                android:id="@+id/section_throttle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:layout_marginBottom="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="油门曲线" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                <RadioGroup android:id="@+id/rg_throttle_curve" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
                     <RadioButton android:id="@+id/rb_curve_linear" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="线性" android:textColor="@color/white" android:buttonTint="@color/v7rc_yellow"/>
                     <RadioButton android:id="@+id/rb_curve_exp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="指数" android:textColor="@color/white" android:buttonTint="@color/v7rc_yellow" android:layout_marginStart="16dp"/>
                 </RadioGroup>
             </LinearLayout>
 
-            <!-- Gyro Sensitivity -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="陀螺仪灵敏度" style="@style/V7RCTextLabel" android:layout_marginTop="16dp" android:layout_marginBottom="8dp"/>
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
-                <SeekBar
-                    android:id="@+id/sb_gyro_sensitivity"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:max="200"
-                    android:progress="100"
-                    android:progressTint="@color/v7rc_yellow"
-                    android:thumbTint="@color/v7rc_yellow"/>
-                <TextView
-                    android:id="@+id/tv_gyro_sensitivity_value"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:text="1.0"
-                    android:textColor="@color/white"
-                    android:gravity="center"/>
+            <!-- Servo Offset -->
+            <LinearLayout
+                android:id="@+id/section_servo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:layout_marginBottom="16dp">
+                <TextView android:layout_width="100dp" android:layout_height="wrap_content" android:text="舵机中位修正" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                    <SeekBar android:id="@+id/sb_servo_offset" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:max="200" android:progress="100" android:progressTint="@color/v7rc_yellow" android:thumbTint="@color/v7rc_yellow"/>
+                    <TextView android:id="@+id/tv_servo_offset_val" android:layout_width="40dp" android:layout_height="wrap_content" android:text="0" android:textColor="@color/white" android:gravity="center"/>
+                </LinearLayout>
             </LinearLayout>
 
-            <!-- Smoothing Settings -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="操控平滑度 (非线性)" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
-                <SeekBar
-                    android:id="@+id/sb_smoothing"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:max="100"
-                    android:progress="50"
-                    android:progressTint="@color/v7rc_yellow"
-                    android:thumbTint="@color/v7rc_yellow"/>
-                <TextView
-                    android:id="@+id/tv_smoothing_value"
-                    android:layout_width="40dp"
-                    android:layout_height="wrap_content"
-                    android:text="0.5"
-                    android:textColor="@color/white"
-                    android:gravity="center"/>
+            <!-- Gyro Sensitivity -->
+            <LinearLayout
+                android:id="@+id/section_gyro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="12dp"
+                android:layout_marginBottom="16dp">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="陀螺仪灵敏度" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                    <SeekBar
+                        android:id="@+id/sb_gyro_sensitivity"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="200"
+                        android:progress="100"
+                        android:progressTint="@color/v7rc_yellow"
+                        android:thumbTint="@color/v7rc_yellow"/>
+                    <TextView
+                        android:id="@+id/tv_gyro_sensitivity_value"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:text="1.0"
+                        android:textColor="@color/white"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="操控平滑度 (非线性)" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                    <SeekBar
+                        android:id="@+id/sb_smoothing"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="100"
+                        android:progress="50"
+                        android:progressTint="@color/v7rc_yellow"
+                        android:thumbTint="@color/v7rc_yellow"/>
+                    <TextView
+                        android:id="@+id/tv_smoothing_value"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:text="0.5"
+                        android:textColor="@color/white"
+                        android:gravity="center"/>
+                </LinearLayout>
             </LinearLayout>
+
+        </LinearLayout>
 
         </LinearLayout>
     </ScrollView>
