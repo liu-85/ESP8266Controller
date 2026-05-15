@@ -104,7 +104,29 @@ class BluetoothConnectionManager(
                 }
             }
 
-            // Try 3: Reflection fallback (Port 1)
+            // Try 3: UUID Discovery fallback (Useful for TV/PC)
+            if (!connected) {
+                try {
+                    val uuids = device.uuids
+                    if (uuids != null && uuids.isNotEmpty()) {
+                        for (uuid in uuids) {
+                            try {
+                                val socket = device.createRfcommSocketToServiceRecord(uuid.uuid)
+                                socket.connect()
+                                bluetoothSocket = socket
+                                connected = true
+                                break
+                            } catch (e: Exception) {
+                                lastException = e
+                            }
+                        }
+                    }
+                } catch (e: Exception) {
+                    lastException = e
+                }
+            }
+
+            // Try 4: Reflection fallback (Port 1)
             if (!connected) {
                 try {
                     val method = device.javaClass.getMethod("createRfcommSocket", Int::class.javaPrimitiveType)

@@ -105,10 +105,10 @@ class JoystickView @JvmOverloads constructor(
                     (innerCircleX - centerX).toDouble().pow(2.0) +
                         (innerCircleY - centerY).toDouble().pow(2.0)
                 ).toFloat()
-                strength = (currentDist / joystickRadius).coerceIn(0f, 1f)
+                strength = if (joystickRadius > 0) (currentDist / joystickRadius).coerceIn(0f, 1f) else 0f
 
                 onJoystickMoveListener?.invoke(angle, strength)
-                invalidate()
+                postInvalidate()
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 reset()
