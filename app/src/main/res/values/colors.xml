@@ -32,8 +32,8 @@
     <color name="theme4_accent">#88e0aa</color>
 
     <!-- iOS Specific -->
-    <color name="ios_bg">#F2F2F7</color>
-    <color name="ios_group_bg">#FFFFFF</color>
+    <color name="ios_bg">#E5E5EA</color> <!-- iOS light gray background -->
+    <color name="ios_group_bg">#CCFFFFFF</color> <!-- Glass-like semi-transparent white -->
     <color name="ios_blue">#007AFF</color>
     <color name="ios_gray">#8E8E93</color>
     <color name="ios_separator">#C6C6C8</color>

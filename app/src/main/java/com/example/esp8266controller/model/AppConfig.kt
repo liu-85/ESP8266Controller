@@ -76,6 +76,8 @@ data class AppConfig(
                 isGyroEnabled = prefs.getBoolean("is_gyro_enabled", false),
                 gyroSensitivity = prefs.getFloat("gyro_sensitivity", 1.0f),
                 smoothingFactor = prefs.getFloat("smoothing_factor", 0.5f),
+                centerDeadzone = prefs.getFloat("center_deadzone", 0.05f),
+                endDeadzone = prefs.getFloat("end_deadzone", 0.05f),
                 enableVibration = prefs.getBoolean("enable_vibration", true)
             )
         }
@@ -109,6 +111,8 @@ data class AppConfig(
                 putBoolean("is_gyro_enabled", config.controlConfig.isGyroEnabled)
                 putFloat("gyro_sensitivity", config.controlConfig.gyroSensitivity)
                 putFloat("smoothing_factor", config.controlConfig.smoothingFactor)
+                putFloat("center_deadzone", config.controlConfig.centerDeadzone)
+                putFloat("end_deadzone", config.controlConfig.endDeadzone)
                 putBoolean("enable_vibration", config.controlConfig.enableVibration)
 
                 putString("app_theme", config.currentTheme.name)

@@ -44,5 +44,7 @@ data class ControlConfig(
     val isGyroEnabled: Boolean = false,
     val gyroSensitivity: Float = 1.0f,
     val smoothingFactor: Float = 0.5f, // 0.0 to 1.0, 1.0 means no smoothing
+    val centerDeadzone: Float = 0.05f, // 中心死区 (0.0 to 1.0)
+    val endDeadzone: Float = 0.05f, // 终点死区 (0.0 to 1.0)
     val enableVibration: Boolean = true // 极限位置震动反馈
 )

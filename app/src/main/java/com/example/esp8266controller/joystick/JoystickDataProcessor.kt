@@ -36,25 +36,29 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
         val range = (maxVal - minVal) / 2
 
         val normalizedStrength = strength.coerceIn(0f, 1f)
+        val centerDeadzone = controlConfig.centerDeadzone
+        val endDeadzone = controlConfig.endDeadzone
 
-        if (normalizedStrength < 0.02f) { // Reduced deadzone for better sensitivity
+        // 1. Center Deadzone handling
+        if (normalizedStrength < centerDeadzone) {
             return center 
         }
 
-        // Convert angle to radians for trigonometric functions
-        // angle: 0=top, 90=right, 180=bottom, 270=left
-        // Standard math: 0=right, 90=top... so we need to adjust
+        // 2. Linear mapping with End Deadzone
+        // Rescale strength from [centerDeadzone, 1.0 - endDeadzone] to [0.0, 1.0]
+        val usableRange = 1.0f - centerDeadzone - endDeadzone
+        val scaledStrength = if (usableRange > 0) {
+            ((normalizedStrength - centerDeadzone) / usableRange).coerceIn(0f, 1f)
+        } else {
+            1.0f
+        }
+
         val rad = Math.toRadians(angle - 90.0)
         
         val rawValue = if (isVertical) {
-            // Vertical (Y): Top is forward (max), Bottom is backward (min)
-            // sin(rad) is -1 at top (angle=0, rad=-90), 1 at bottom (angle=180, rad=90)
-            // So we use -sin(rad)
-            (center - sin(rad) * range * normalizedStrength).toInt()
+            (center - sin(rad) * range * scaledStrength).toInt()
         } else {
-            // Horizontal (X): Right is positive, Left is negative
-            // cos(rad) is 1 at right (angle=90, rad=0), -1 at left (angle=270, rad=180)
-            (center + cos(rad) * range * normalizedStrength).toInt()
+            (center + cos(rad) * range * scaledStrength).toInt()
         }
         
         val constrainedValue = rawValue.coerceIn(minVal, maxVal)

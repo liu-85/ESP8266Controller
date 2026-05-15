@@ -149,22 +149,31 @@ class MainActivity : AppCompatActivity() {
             mainWifiIcon.setTextColor(accentColor)
             mainBtIcon.setTextColor(accentColor)
             openSettings.setColorFilter(accentColor)
-            gyroToggle.setTextColor(accentColor)
             
             // Apply theme colors to all action buttons
-            val buttons = listOf(
-                btn1, btn2, btn3, btn4, 
-                gyroToggle
-            )
+            val buttons = listOf(btn1, btn2, btn3, btn4, gyroToggle)
             
             buttons.forEach { btn ->
                 if (isIOS) {
                     btn?.setBackgroundResource(R.drawable.ios_button_bg)
-                    btn?.setTextColor(accentColor)
+                    btn?.setTextColor(Color.BLACK) // iOS glass buttons usually have black/dark text
+                    btn?.elevation = 2f
                 } else {
                     btn?.setBackgroundResource(R.drawable.button_selector)
                     btn?.setTextColor(accentColor)
+                    btn?.elevation = 4f
                 }
+            }
+
+            // Update Status Bar / Icons for iOS
+            if (isIOS) {
+                mainWifiIcon.setBackgroundResource(R.drawable.ios_button_bg)
+                mainBtIcon.setBackgroundResource(R.drawable.ios_button_bg)
+                findViewById<View>(R.id.top_bar).setBackgroundColor(Color.parseColor("#1A000000")) // Very light overlay
+            } else {
+                mainWifiIcon.setBackgroundResource(R.drawable.bg_circle_status)
+                mainBtIcon.setBackgroundResource(R.drawable.bg_circle_status)
+                findViewById<View>(R.id.top_bar).setBackgroundColor(Color.parseColor("#33000000"))
             }
 
             // Update Joystick colors

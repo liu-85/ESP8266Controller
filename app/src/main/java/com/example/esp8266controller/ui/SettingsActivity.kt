@@ -33,6 +33,10 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var tvGyroSensitivityValue: TextView
     private lateinit var sbSmoothing: SeekBar
     private lateinit var tvSmoothingValue: TextView
+    private lateinit var sbCenterDeadzone: SeekBar
+    private lateinit var tvCenterDeadzoneVal: TextView
+    private lateinit var sbEndDeadzone: SeekBar
+    private lateinit var tvEndDeadzoneVal: TextView
 
     private lateinit var sbHeartbeat: SeekBar
     private lateinit var tvHeartbeatVal: TextView
@@ -88,6 +92,10 @@ class SettingsActivity : AppCompatActivity() {
         tvGyroSensitivityValue = findViewById(R.id.tv_gyro_sensitivity_value)
         sbSmoothing = findViewById(R.id.sb_smoothing)
         tvSmoothingValue = findViewById(R.id.tv_smoothing_value)
+        sbCenterDeadzone = findViewById(R.id.sb_center_deadzone)
+        tvCenterDeadzoneVal = findViewById(R.id.tv_center_deadzone_val)
+        sbEndDeadzone = findViewById(R.id.sb_end_deadzone)
+        tvEndDeadzoneVal = findViewById(R.id.tv_end_deadzone_val)
         
         sbHeartbeat = findViewById(R.id.sb_heartbeat)
         tvHeartbeatVal = findViewById(R.id.tv_heartbeat_val)
@@ -171,6 +179,24 @@ class SettingsActivity : AppCompatActivity() {
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
+        sbCenterDeadzone.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val value = progress / 100f
+                tvCenterDeadzoneVal.text = String.format("%.2f", value)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        sbEndDeadzone.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val value = progress / 100f
+                tvEndDeadzoneVal.text = String.format("%.2f", value)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
         sbHeartbeat.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 tvHeartbeatVal.text = progress.toString()
@@ -232,6 +258,13 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showBluetoothDevicePicker() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), 101)
+                return
+            }
+        }
+
         val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         if (bluetoothAdapter == null) {
             Toast.makeText(this, "该设备不支持蓝牙", Toast.LENGTH_SHORT).show()
@@ -249,7 +282,7 @@ class SettingsActivity : AppCompatActivity() {
             return
         }
 
-        val deviceNames = bondedDevices.map { "${it.name}\n${it.address}" }.toTypedArray()
+        val deviceNames = bondedDevices.map { "${it.name ?: "未知设备"}\n${it.address}" }.toTypedArray()
         
         androidx.appcompat.app.AlertDialog.Builder(this)
             .setTitle("选择已配对的蓝牙设备")
@@ -265,7 +298,8 @@ class SettingsActivity : AppCompatActivity() {
                     )
                     AppConfig.save(this, newConfig)
                     appConfig = newConfig
-                    connectionStatus.text = "已选择蓝牙: ${device.name}"
+                    connectionStatus.text = "已选择蓝牙: ${device.name ?: device.address}"
+                    Toast.makeText(this, "蓝牙设备已选择: ${device.name ?: device.address}", Toast.LENGTH_SHORT).show()
                 }
             }
             .setNegativeButton("取消", null)
@@ -339,8 +373,10 @@ class SettingsActivity : AppCompatActivity() {
             val section = findViewById<View>(id) ?: return@forEach
             if (isIOS) {
                 section.setBackgroundResource(R.drawable.ios_card_bg)
+                section.elevation = 0f // Glass doesn't need much elevation
             } else {
                 section.background = null
+                section.elevation = 0f
             }
         }
     }
@@ -351,9 +387,12 @@ class SettingsActivity : AppCompatActivity() {
                 updateChildTextColors(view.getChildAt(i), color)
             }
         } else if (view is TextView) {
-            // Don't change button text color as they have selectors
-            if (view !is Button) {
+            // Don't change primary buttons as they have selectors
+            if (view !is Button || view is RadioButton) {
                 view.setTextColor(color)
+                if (view is RadioButton) {
+                    view.buttonTintList = android.content.res.ColorStateList.valueOf(color)
+                }
             }
         }
     }
@@ -370,6 +409,12 @@ class SettingsActivity : AppCompatActivity() {
 
             sbSmoothing.progress = (config.controlConfig.smoothingFactor * 100).toInt()
             tvSmoothingValue.text = String.format("%.1f", config.controlConfig.smoothingFactor)
+
+            sbCenterDeadzone.progress = (config.controlConfig.centerDeadzone * 100).toInt()
+            tvCenterDeadzoneVal.text = String.format("%.2f", config.controlConfig.centerDeadzone)
+
+            sbEndDeadzone.progress = (config.controlConfig.endDeadzone * 100).toInt()
+            tvEndDeadzoneVal.text = String.format("%.2f", config.controlConfig.endDeadzone)
 
             sbHeartbeat.progress = config.controlConfig.heartbeatIntervalMs.toInt()
             tvHeartbeatVal.text = config.controlConfig.heartbeatIntervalMs.toString()
@@ -409,6 +454,8 @@ class SettingsActivity : AppCompatActivity() {
                     channelSources = channelSources,
                     gyroSensitivity = sbGyroSensitivity.progress / 100f,
                     smoothingFactor = sbSmoothing.progress / 100f,
+                    centerDeadzone = sbCenterDeadzone.progress / 100f,
+                    endDeadzone = sbEndDeadzone.progress / 100f,
                     heartbeatIntervalMs = sbHeartbeat.progress.toLong(),
                     inactivityTimeoutMs = sbTimeout.progress.toLong() * 60000,
                     servoCenterOffset = sbServoOffset.progress - 100,

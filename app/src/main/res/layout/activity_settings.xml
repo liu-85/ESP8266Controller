@@ -257,7 +257,7 @@
                 </LinearLayout>
 
                 <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="操控平滑度 (非线性)" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
                     <SeekBar
                         android:id="@+id/sb_smoothing"
                         android:layout_width="0dp"
@@ -272,6 +272,46 @@
                         android:layout_width="40dp"
                         android:layout_height="wrap_content"
                         android:text="0.5"
+                        android:textColor="@color/white"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="中心死区" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
+                    <SeekBar
+                        android:id="@+id/sb_center_deadzone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="50"
+                        android:progress="5"
+                        android:progressTint="@color/v7rc_yellow"
+                        android:thumbTint="@color/v7rc_yellow"/>
+                    <TextView
+                        android:id="@+id/tv_center_deadzone_val"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:text="0.05"
+                        android:textColor="@color/white"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="终点死区" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                    <SeekBar
+                        android:id="@+id/sb_end_deadzone"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:max="50"
+                        android:progress="5"
+                        android:progressTint="@color/v7rc_yellow"
+                        android:thumbTint="@color/v7rc_yellow"/>
+                    <TextView
+                        android:id="@+id/tv_end_deadzone_val"
+                        android:layout_width="40dp"
+                        android:layout_height="wrap_content"
+                        android:text="0.05"
                         android:textColor="@color/white"
                         android:gravity="center"/>
                 </LinearLayout>
