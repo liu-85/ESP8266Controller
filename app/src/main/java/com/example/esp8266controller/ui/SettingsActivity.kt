@@ -295,10 +295,65 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updateThemeUI() {
+        val isIOS = selectedTheme == AppTheme.THEME_3
+        val bgColor = when (selectedTheme) {
+            AppTheme.THEME_1 -> resources.getColor(R.color.theme1_bg, null)
+            AppTheme.THEME_2 -> resources.getColor(R.color.theme2_bg, null)
+            AppTheme.THEME_3 -> resources.getColor(R.color.ios_bg, null)
+            AppTheme.THEME_4 -> resources.getColor(R.color.theme4_bg, null)
+        }
+        val accentColor = when (selectedTheme) {
+            AppTheme.THEME_1 -> resources.getColor(R.color.theme1_accent, null)
+            AppTheme.THEME_2 -> resources.getColor(R.color.theme2_accent, null)
+            AppTheme.THEME_3 -> resources.getColor(R.color.ios_blue, null)
+            AppTheme.THEME_4 -> resources.getColor(R.color.theme4_accent, null)
+        }
+        
+        findViewById<View>(R.id.settings_root).setBackgroundColor(bgColor)
+        
+        // Update all text labels to black if light theme
+        val isLightTheme = selectedTheme == AppTheme.THEME_2 || selectedTheme == AppTheme.THEME_3 || selectedTheme == AppTheme.THEME_4
+        val textColor = if (isLightTheme) Color.BLACK else Color.WHITE
+        
+        updateChildTextColors(findViewById(R.id.settings_root), textColor)
+        
         theme1Btn.isSelected = selectedTheme == AppTheme.THEME_1
         theme2Btn.isSelected = selectedTheme == AppTheme.THEME_2
         theme3Btn.isSelected = selectedTheme == AppTheme.THEME_3
         theme4Btn.isSelected = selectedTheme == AppTheme.THEME_4
+
+        // Apply iOS specific card styling if needed
+        val sectionIds = listOf(
+            R.id.section_connection,
+            R.id.section_heartbeat,
+            R.id.section_mapping,
+            R.id.section_theme,
+            R.id.section_throttle,
+            R.id.section_servo,
+            R.id.section_gyro
+        )
+
+        sectionIds.forEach { id ->
+            val section = findViewById<View>(id) ?: return@forEach
+            if (isIOS) {
+                section.setBackgroundResource(R.drawable.ios_card_bg)
+            } else {
+                section.background = null
+            }
+        }
+    }
+
+    private fun updateChildTextColors(view: View, color: Int) {
+        if (view is ViewGroup) {
+            for (i in 0 until view.childCount) {
+                updateChildTextColors(view.getChildAt(i), color)
+            }
+        } else if (view is TextView) {
+            // Don't change button text color as they have selectors
+            if (view !is Button) {
+                view.setTextColor(color)
+            }
+        }
     }
 
     private fun populateViews() {

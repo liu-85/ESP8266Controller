@@ -117,6 +117,12 @@ class JoystickView @JvmOverloads constructor(
         return true
     }
 
+    fun setColors(outerColor: Int, innerColor: Int) {
+        outerPaint.color = outerColor
+        innerPaint.color = innerColor
+        invalidate()
+    }
+
     fun setOnJoystickMoveListener(listener: (angle: Double, strength: Float) -> Unit) {
         this.onJoystickMoveListener = listener
     }

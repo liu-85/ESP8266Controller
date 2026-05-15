@@ -135,10 +135,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun applyTheme() {
         appConfig?.let { config ->
+            val isIOS = config.currentTheme == AppTheme.THEME_3
             val (bgColor, accentColor) = when (config.currentTheme) {
                 AppTheme.THEME_1 -> resources.getColor(R.color.theme1_bg, null) to resources.getColor(R.color.theme1_accent, null)
                 AppTheme.THEME_2 -> resources.getColor(R.color.theme2_bg, null) to resources.getColor(R.color.theme2_accent, null)
-                AppTheme.THEME_3 -> resources.getColor(R.color.theme3_bg, null) to resources.getColor(R.color.theme3_accent, null)
+                AppTheme.THEME_3 -> resources.getColor(R.color.ios_bg, null) to resources.getColor(R.color.ios_blue, null)
                 AppTheme.THEME_4 -> resources.getColor(R.color.theme4_bg, null) to resources.getColor(R.color.theme4_accent, null)
             }
             mainLayout.setBackgroundColor(bgColor)
@@ -156,27 +157,35 @@ class MainActivity : AppCompatActivity() {
             )
             
             buttons.forEach { btn ->
-                // For iOS theme (Theme 3), use blue text on white-ish buttons
-                if (config.currentTheme == AppTheme.THEME_3) {
+                if (isIOS) {
+                    btn?.setBackgroundResource(R.drawable.ios_button_bg)
                     btn?.setTextColor(accentColor)
                 } else {
+                    btn?.setBackgroundResource(R.drawable.button_selector)
                     btn?.setTextColor(accentColor)
                 }
-                
-                // If the theme is light (Theme 2, 3 or 4), use dark text for contrast if needed
-                if (config.currentTheme == AppTheme.THEME_2 || 
-                    config.currentTheme == AppTheme.THEME_3 || 
-                    config.currentTheme == AppTheme.THEME_4) {
-                    status_bar.setTextColor(resources.getColor(R.color.black, null))
-                    // Switches and other labels
-                    findViewById<TextView>(R.id.status_bar).setTextColor(resources.getColor(R.color.black, null))
-                    findViewById<TextView>(R.id.switch1_label).setTextColor(resources.getColor(R.color.black, null))
-                    findViewById<TextView>(R.id.switch2_label).setTextColor(resources.getColor(R.color.black, null))
-                } else {
-                    status_bar.setTextColor(resources.getColor(R.color.white, null))
-                    findViewById<TextView>(R.id.switch1_label).setTextColor(resources.getColor(R.color.white, null))
-                    findViewById<TextView>(R.id.switch2_label).setTextColor(resources.getColor(R.color.white, null))
-                }
+            }
+
+            // Update Joystick colors
+            if (isIOS) {
+                leftJoystick.setColors(Color.parseColor("#E5E5EA"), accentColor)
+                rightJoystick.setColors(Color.parseColor("#E5E5EA"), accentColor)
+            } else {
+                leftJoystick.setColors(Color.parseColor("#33FFFFFF"), Color.parseColor("#FFD700"))
+                rightJoystick.setColors(Color.parseColor("#33FFFFFF"), Color.parseColor("#FFD700"))
+            }
+            
+            // If the theme is light (Theme 2, 3 or 4), use dark text for contrast
+            if (config.currentTheme == AppTheme.THEME_2 || 
+                config.currentTheme == AppTheme.THEME_3 || 
+                config.currentTheme == AppTheme.THEME_4) {
+                status_bar.setTextColor(resources.getColor(R.color.black, null))
+                findViewById<TextView>(R.id.switch1_label).setTextColor(resources.getColor(R.color.black, null))
+                findViewById<TextView>(R.id.switch2_label).setTextColor(resources.getColor(R.color.black, null))
+            } else {
+                status_bar.setTextColor(resources.getColor(R.color.white, null))
+                findViewById<TextView>(R.id.switch1_label).setTextColor(resources.getColor(R.color.white, null))
+                findViewById<TextView>(R.id.switch2_label).setTextColor(resources.getColor(R.color.white, null))
             }
             
             // Update connection icons state

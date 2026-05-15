@@ -57,31 +57,38 @@
             android:orientation="vertical"
             android:padding="24dp">
 
-            <!-- Connection Mode -->
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="连接方式" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+            <!-- Connection Mode & WIFI Settings -->
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginBottom="16dp">
-                <androidx.appcompat.widget.AppCompatButton android:id="@+id/wifiModeBtn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="WIFI" style="@style/V7RCYellowButton" android:layout_marginEnd="8dp"/>
-                <androidx.appcompat.widget.AppCompatButton android:id="@+id/btModeBtn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="蓝牙" style="@style/V7RCActionButton"/>
-            </LinearLayout>
-
-            <!-- WIFI Settings -->
-            <LinearLayout
-                android:id="@+id/wifiSettings"
+                android:id="@+id/section_connection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
+                android:padding="12dp"
                 android:layout_marginBottom="16dp">
-                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WIFI 设置" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
-                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="IP" style="@style/V7RCTextLabel" android:layout_marginEnd="8dp"/>
-                    <EditText android:id="@+id/ipInput" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="192.168.2.169" android:layout_marginEnd="8dp"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Port" style="@style/V7RCTextLabel" android:layout_marginEnd="8dp"/>
-                    <EditText android:id="@+id/portInput" android:layout_width="60dp" android:layout_height="wrap_content" style="@style/V7RCEditText" android:text="2000" android:layout_marginEnd="8dp"/>
-                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/saveConnectionBtn" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="储存" style="@style/V7RCYellowButton"/>
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="连接方式" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/wifiModeBtn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="WIFI" style="@style/V7RCYellowButton" android:layout_marginEnd="8dp"/>
+                    <androidx.appcompat.widget.AppCompatButton android:id="@+id/btModeBtn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="蓝牙" style="@style/V7RCActionButton"/>
+                </LinearLayout>
+
+                <!-- WIFI Settings -->
+                <LinearLayout
+                    android:id="@+id/wifiSettings"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WIFI 设置" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="IP" style="@style/V7RCTextLabel" android:layout_marginEnd="8dp"/>
+                        <EditText android:id="@+id/ipInput" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="192.168.2.169" android:layout_marginEnd="8dp"/>
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Port" style="@style/V7RCTextLabel" android:layout_marginEnd="8dp"/>
+                        <EditText android:id="@+id/portInput" android:layout_width="60dp" android:layout_height="wrap_content" style="@style/V7RCEditText" android:text="2000" android:layout_marginEnd="8dp"/>
+                        <androidx.appcompat.widget.AppCompatButton android:id="@+id/saveConnectionBtn" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="储存" style="@style/V7RCYellowButton"/>
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
 

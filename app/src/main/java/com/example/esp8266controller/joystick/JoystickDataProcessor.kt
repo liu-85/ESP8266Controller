@@ -37,43 +37,30 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
 
         val normalizedStrength = strength.coerceIn(0f, 1f)
 
-        if (normalizedStrength < 0.05f) {
-            return center // Near center, return neutral value
+        if (normalizedStrength < 0.02f) { // Reduced deadzone for better sensitivity
+            return center 
         }
 
-        val valueOffset = (range * normalizedStrength).toInt()
-
+        // Convert angle to radians for trigonometric functions
+        // angle: 0=top, 90=right, 180=bottom, 270=left
+        // Standard math: 0=right, 90=top... so we need to adjust
+        val rad = Math.toRadians(angle - 90.0)
+        
         val rawValue = if (isVertical) {
-            // Vertical: angle near 0° (top) -> forward, near 180° (bottom) -> backward
-            val adjustedAngle = when {
-                angle >= 0 && angle <= 90 -> 90 - angle // Top quadrant
-                angle > 90 && angle <= 270 -> 90 - angle // Bottom half (negative values)
-                angle > 270 -> 90 - (angle - 360) // Top-right quadrant
-                else -> 0.0
-            }
-
-            when {
-                adjustedAngle >= 45 -> center + valueOffset // Forward
-                adjustedAngle <= -45 -> center - valueOffset // Backward
-                else -> center
-            }
+            // Vertical (Y): Top is forward (max), Bottom is backward (min)
+            // sin(rad) is -1 at top (angle=0, rad=-90), 1 at bottom (angle=180, rad=90)
+            // So we use -sin(rad)
+            (center - sin(rad) * range * normalizedStrength).toInt()
         } else {
-            // Horizontal: angle near 90° (right) -> right, near 270° (left) -> left
-            val adjustedAngle = when {
-                angle >= 0 && angle <= 180 -> angle - 90 // Right half
-                angle > 180 && angle <= 360 -> angle - 270 // Left half
-                else -> 0.0
-            }
-
-            when {
-                adjustedAngle >= 45 -> center + valueOffset // Right
-                adjustedAngle <= -45 -> center - valueOffset // Left
-                else -> center
-            }
+            // Horizontal (X): Right is positive, Left is negative
+            // cos(rad) is 1 at right (angle=90, rad=0), -1 at left (angle=270, rad=180)
+            (center + cos(rad) * range * normalizedStrength).toInt()
         }
         
-        // Apply throttle curve if it's a throttle source (simplified: always apply to Y axis for now)
-        return if (isVertical) applyThrottleCurve(rawValue) else rawValue
+        val constrainedValue = rawValue.coerceIn(minVal, maxVal)
+        
+        // Apply throttle curve if it's a throttle source
+        return if (isVertical) applyThrottleCurve(constrainedValue) else constrainedValue
     }
 
     fun formatCommand(

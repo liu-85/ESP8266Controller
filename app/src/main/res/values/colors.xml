@@ -30,4 +30,12 @@
     <color name="theme3_accent">#007AFF</color>
     <color name="theme4_bg">#f8f8f0</color>
     <color name="theme4_accent">#88e0aa</color>
+
+    <!-- iOS Specific -->
+    <color name="ios_bg">#F2F2F7</color>
+    <color name="ios_group_bg">#FFFFFF</color>
+    <color name="ios_blue">#007AFF</color>
+    <color name="ios_gray">#8E8E93</color>
+    <color name="ios_separator">#C6C6C8</color>
+    <color name="ios_text">#000000</color>
 </resources>
