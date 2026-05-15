@@ -48,12 +48,13 @@ class MainActivity : AppCompatActivity() {
     private val controlScope = CoroutineScope(Dispatchers.IO + controlJob)
     private var sendDataJob: Job? = null
     private var heartbeatJob: Job? = null
+    private var autoStopJob: Job? = null
     private var lastOperationTime: Long = 0
 
-    private var leftY: Int = 1500
-    private var leftX: Int = 1500
-    private var rightY: Int = 1500
-    private var rightX: Int = 1500
+    private var targetLeftY: Int = 1500
+    private var targetLeftX: Int = 1500
+    private var targetRightY: Int = 1500
+    private var targetRightX: Int = 1500
 
     private lateinit var vibrator: android.os.Vibrator
 
@@ -71,7 +72,39 @@ class MainActivity : AppCompatActivity() {
         setupGyroController()
         setupHeartbeat()
         setupTimeoutCheck()
+        startControlLoop() // Start a continuous loop for smooth control
         applyTheme()
+    }
+
+    private fun startControlLoop() {
+        sendDataJob?.cancel()
+        sendDataJob = controlScope.launch {
+            while (isActive) {
+                val config = appConfig?.controlConfig ?: ControlConfig()
+                val interval = config.sendIntervalMs
+                
+                if (connectionManager?.connectionState is ConnectionState.Connected) {
+                    val processor = dataProcessor ?: return@launch
+                    
+                    // Always format command to update smoothed values
+                    val command = processor.formatCommand(
+                        targetLeftY, targetLeftX,
+                        targetRightY, targetRightX,
+                        listOf(btn1.isSelected, btn2.isSelected, btn3.isSelected, btn4.isSelected),
+                        listOf(switch1.isChecked, switch2.isChecked)
+                    )
+                    
+                    // Only send if not neutral OR if it's currently smoothing towards neutral
+                    if (!processor.isNeutral() || (System.currentTimeMillis() - lastOperationTime < 1000)) {
+                        connectionManager?.sendData(command)
+                        withContext(Dispatchers.Main) {
+                            updateConnectionStatusIcon(true)
+                        }
+                    }
+                }
+                delay(interval)
+            }
+        }
     }
 
     private fun setupHeartbeat() {
@@ -80,8 +113,10 @@ class MainActivity : AppCompatActivity() {
             while (isActive) {
                 val interval = appConfig?.controlConfig?.heartbeatIntervalMs ?: 1000
                 delay(interval)
-                if (connectionManager?.connectionState is ConnectionState.Connected) {
-                    // 心跳保活：发送不带指令的换行符或空包，ESP端收到后仅刷新连接计时
+                // Only send heartbeat if we are NOT actively sending control data
+                val processor = dataProcessor
+                if (connectionManager?.connectionState is ConnectionState.Connected && 
+                    (processor == null || processor.isNeutral())) {
                     connectionManager?.sendData("\n")
                 }
             }
@@ -140,15 +175,18 @@ class MainActivity : AppCompatActivity() {
             val (bgColor, accentColor) = when (config.currentTheme) {
                 AppTheme.THEME_1 -> resources.getColor(R.color.theme1_bg, null) to resources.getColor(R.color.theme1_accent, null)
                 AppTheme.THEME_2 -> resources.getColor(R.color.theme2_bg, null) to resources.getColor(R.color.theme2_accent, null)
-                AppTheme.THEME_3 -> resources.getColor(R.color.ios_bg, null) to resources.getColor(R.color.ios_blue, null)
+                AppTheme.THEME_3 -> Color.parseColor("#E5E5EA") to Color.parseColor("#007AFF") // iOS Gray and Blue
                 AppTheme.THEME_4 -> resources.getColor(R.color.theme4_bg, null) to resources.getColor(R.color.theme4_accent, null)
             }
             mainLayout.setBackgroundColor(bgColor)
             
+            // For iOS glass effect, we wrap the main content in a translucent white overlay if needed
+            // But we can also just style the components.
+            
             // Apply accent color to icons and buttons
-            mainWifiIcon.setTextColor(accentColor)
-            mainBtIcon.setTextColor(accentColor)
-            openSettings.setColorFilter(accentColor)
+            mainWifiIcon.setTextColor(if (isIOS) Color.BLACK else accentColor)
+            mainBtIcon.setTextColor(if (isIOS) Color.BLACK else accentColor)
+            openSettings.setColorFilter(if (isIOS) Color.BLACK else accentColor)
             
             // Apply theme colors to all action buttons
             val buttons = listOf(btn1, btn2, btn3, btn4, gyroToggle)
@@ -156,8 +194,8 @@ class MainActivity : AppCompatActivity() {
             buttons.forEach { btn ->
                 if (isIOS) {
                     btn?.setBackgroundResource(R.drawable.ios_button_bg)
-                    btn?.setTextColor(Color.BLACK) // iOS glass buttons usually have black/dark text
-                    btn?.elevation = 2f
+                    btn?.setTextColor(Color.BLACK) 
+                    btn?.elevation = 0f
                 } else {
                     btn?.setBackgroundResource(R.drawable.button_selector)
                     btn?.setTextColor(accentColor)
@@ -169,33 +207,29 @@ class MainActivity : AppCompatActivity() {
             if (isIOS) {
                 mainWifiIcon.setBackgroundResource(R.drawable.ios_button_bg)
                 mainBtIcon.setBackgroundResource(R.drawable.ios_button_bg)
-                findViewById<View>(R.id.top_bar).setBackgroundColor(Color.parseColor("#1A000000")) // Very light overlay
+                findViewById<View>(R.id.top_bar).setBackgroundColor(Color.parseColor("#4DFFFFFF")) // Translucent white bar
+                status_bar.setTextColor(Color.BLACK)
+                findViewById<TextView>(R.id.switch1_label).setTextColor(Color.BLACK)
+                findViewById<TextView>(R.id.switch2_label).setTextColor(Color.BLACK)
             } else {
                 mainWifiIcon.setBackgroundResource(R.drawable.bg_circle_status)
                 mainBtIcon.setBackgroundResource(R.drawable.bg_circle_status)
                 findViewById<View>(R.id.top_bar).setBackgroundColor(Color.parseColor("#33000000"))
+                
+                val isLightTheme = config.currentTheme == AppTheme.THEME_2 || config.currentTheme == AppTheme.THEME_4
+                val textColor = if (isLightTheme) Color.BLACK else Color.WHITE
+                status_bar.setTextColor(textColor)
+                findViewById<TextView>(R.id.switch1_label).setTextColor(textColor)
+                findViewById<TextView>(R.id.switch2_label).setTextColor(textColor)
             }
 
             // Update Joystick colors
             if (isIOS) {
-                leftJoystick.setColors(Color.parseColor("#E5E5EA"), accentColor)
-                rightJoystick.setColors(Color.parseColor("#E5E5EA"), accentColor)
+                leftJoystick.setColors(Color.parseColor("#80FFFFFF"), Color.parseColor("#007AFF")) // Translucent white ring, iOS blue knob
+                rightJoystick.setColors(Color.parseColor("#80FFFFFF"), Color.parseColor("#007AFF"))
             } else {
                 leftJoystick.setColors(Color.parseColor("#33FFFFFF"), Color.parseColor("#FFD700"))
                 rightJoystick.setColors(Color.parseColor("#33FFFFFF"), Color.parseColor("#FFD700"))
-            }
-            
-            // If the theme is light (Theme 2, 3 or 4), use dark text for contrast
-            if (config.currentTheme == AppTheme.THEME_2 || 
-                config.currentTheme == AppTheme.THEME_3 || 
-                config.currentTheme == AppTheme.THEME_4) {
-                status_bar.setTextColor(resources.getColor(R.color.black, null))
-                findViewById<TextView>(R.id.switch1_label).setTextColor(resources.getColor(R.color.black, null))
-                findViewById<TextView>(R.id.switch2_label).setTextColor(resources.getColor(R.color.black, null))
-            } else {
-                status_bar.setTextColor(resources.getColor(R.color.white, null))
-                findViewById<TextView>(R.id.switch1_label).setTextColor(resources.getColor(R.color.white, null))
-                findViewById<TextView>(R.id.switch2_label).setTextColor(resources.getColor(R.color.white, null))
             }
             
             // Update connection icons state
@@ -269,23 +303,21 @@ class MainActivity : AppCompatActivity() {
     private fun setupJoystickProcessor() {
         leftJoystick.setOnJoystickMoveListener { angle, strength ->
             if (appConfig?.controlConfig?.isGyroEnabled == false) {
-                leftY = dataProcessor!!.mapToChannelValue(angle, strength, true)
-                leftX = dataProcessor!!.mapToChannelValue(angle, strength, false)
+                targetLeftY = dataProcessor!!.mapToChannelValue(angle, strength, true)
+                targetLeftX = dataProcessor!!.mapToChannelValue(angle, strength, false)
                 
                 if (strength > 0.95f) triggerVibration()
-                
-                updateStatus("左摇杆: Y=$leftY, X=$leftX")
+                updateStatus("左摇杆: Y=$targetLeftY, X=$targetLeftX")
                 sendControlData()
             }
         }
 
         rightJoystick.setOnJoystickMoveListener { angle, strength ->
-            rightY = dataProcessor!!.mapToChannelValue(angle, strength, true)
-            rightX = dataProcessor!!.mapToChannelValue(angle, strength, false)
+            targetRightY = dataProcessor!!.mapToChannelValue(angle, strength, true)
+            targetRightX = dataProcessor!!.mapToChannelValue(angle, strength, false)
             
             if (strength > 0.95f) triggerVibration()
-            
-            updateStatus("右摇杆: Y=$rightY, X=$rightX")
+            updateStatus("右摇杆: Y=$targetRightY, X=$targetRightX")
             sendControlData()
         }
     }
@@ -376,8 +408,8 @@ class MainActivity : AppCompatActivity() {
         gyroController.setOnDataUpdateListener { pitch, roll ->
             if (appConfig?.controlConfig?.isGyroEnabled == true) {
                 val channelData = gyroController.processGyroData(pitch, roll)
-                leftY = channelData.throttle
-                leftX = channelData.steering
+                targetLeftY = channelData.throttle
+                targetLeftX = channelData.steering
                 
                 // Update UI visually
                 val pitchStrength = Math.abs(pitch) / 45f
@@ -389,32 +421,15 @@ class MainActivity : AppCompatActivity() {
                     leftJoystick.setKnobPosition(angle, strength)
                 }
 
-                updateStatus("陀螺仪控制: Y=$leftY, X=$leftX")
+                updateStatus("陀螺仪控制: Y=$targetLeftY, X=$targetLeftX")
                 sendControlData()
             }
         }
     }
 
-    private fun sendControlData(isHeartbeat: Boolean = false) {
-        val manager = connectionManager ?: return
-        if (manager.connectionState !is ConnectionState.Connected) return
-
+    private fun sendControlData() {
         lastOperationTime = System.currentTimeMillis()
-
-        controlScope.launch {
-            val command = dataProcessor?.formatCommand(
-                leftY, leftX,
-                rightY, rightX,
-                listOf(btn1.isSelected, btn2.isSelected, btn3.isSelected, btn4.isSelected),
-                listOf(switch1.isChecked, switch2.isChecked)
-            )
-            command?.let { payload ->
-                manager.sendData(payload)
-                withContext(Dispatchers.Main) {
-                    updateConnectionStatusIcon(true)
-                }
-            }
-        }
+        // No longer sends immediately, startControlLoop handles it
     }
 
     private fun sendImmediateCommand(cmd: String) {

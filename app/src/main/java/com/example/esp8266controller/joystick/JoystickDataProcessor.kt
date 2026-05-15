@@ -3,7 +3,10 @@ package com.example.esp8266controller.joystick
 import com.example.esp8266controller.model.ControlConfig
 import com.example.esp8266controller.model.ControlSource
 import com.example.esp8266controller.model.ThrottleCurve
-import kotlin.math.*
+import kotlin.math.abs
+import kotlin.math.cos
+import kotlin.math.pow
+import kotlin.math.sin
 
 class JoystickDataProcessor(private val controlConfig: ControlConfig) {
 
@@ -133,5 +136,13 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
 
     fun formatButtonCommand(command: String): String {
         return "$command\n"
+    }
+
+    fun isNeutral(): Boolean {
+        val threshold = 2.0 // Small threshold for float comparison
+        return abs(smoothedLeftY - controlConfig.centerValue) < threshold &&
+               abs(smoothedLeftX - controlConfig.centerValue) < threshold &&
+               abs(smoothedRightY - controlConfig.centerValue) < threshold &&
+               abs(smoothedRightX - controlConfig.centerValue) < threshold
     }
 }

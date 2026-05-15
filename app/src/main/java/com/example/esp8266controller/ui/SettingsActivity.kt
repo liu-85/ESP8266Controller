@@ -258,13 +258,6 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun showBluetoothDevicePicker() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), 101)
-                return
-            }
-        }
-
         val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
         if (bluetoothAdapter == null) {
             Toast.makeText(this, "该设备不支持蓝牙", Toast.LENGTH_SHORT).show()
@@ -273,19 +266,28 @@ class SettingsActivity : AppCompatActivity() {
 
         if (!bluetoothAdapter.isEnabled) {
             Toast.makeText(this, "请先开启蓝牙", Toast.LENGTH_SHORT).show()
+            // Optional: prompt to enable bluetooth
             return
+        }
+
+        // Permission check for Android 12+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.BLUETOOTH_CONNECT), 101)
+                return
+            }
         }
 
         val bondedDevices = bluetoothAdapter.bondedDevices.toList()
         if (bondedDevices.isEmpty()) {
-            Toast.makeText(this, "请先在系统设置中配对蓝牙设备", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "未发现已配对设备，请先在手机系统设置中配对", Toast.LENGTH_LONG).show()
             return
         }
 
         val deviceNames = bondedDevices.map { "${it.name ?: "未知设备"}\n${it.address}" }.toTypedArray()
         
-        androidx.appcompat.app.AlertDialog.Builder(this)
-            .setTitle("选择已配对的蓝牙设备")
+        androidx.appcompat.app.AlertDialog.Builder(this, R.style.Theme_AppCompat_Light_Dialog_Alert)
+            .setTitle("选择蓝牙设备")
             .setItems(deviceNames) { _, which ->
                 val device = bondedDevices[which]
                 appConfig?.let { config ->
@@ -293,13 +295,13 @@ class SettingsActivity : AppCompatActivity() {
                         connectionConfig = config.connectionConfig.copy(
                             connectionType = ConnectionType.BLUETOOTH,
                             bluetoothAddress = device.address,
-                            bluetoothName = device.name ?: ""
+                            bluetoothName = device.name ?: "未知"
                         )
                     )
                     AppConfig.save(this, newConfig)
                     appConfig = newConfig
-                    connectionStatus.text = "已选择蓝牙: ${device.name ?: device.address}"
-                    Toast.makeText(this, "蓝牙设备已选择: ${device.name ?: device.address}", Toast.LENGTH_SHORT).show()
+                    connectionStatus.text = "已选蓝牙: ${device.name ?: device.address}"
+                    updateConnectionUI()
                 }
             }
             .setNegativeButton("取消", null)
@@ -335,14 +337,8 @@ class SettingsActivity : AppCompatActivity() {
         val bgColor = when (selectedTheme) {
             AppTheme.THEME_1 -> resources.getColor(R.color.theme1_bg, null)
             AppTheme.THEME_2 -> resources.getColor(R.color.theme2_bg, null)
-            AppTheme.THEME_3 -> resources.getColor(R.color.ios_bg, null)
+            AppTheme.THEME_3 -> Color.parseColor("#E5E5EA") // iOS Background
             AppTheme.THEME_4 -> resources.getColor(R.color.theme4_bg, null)
-        }
-        val accentColor = when (selectedTheme) {
-            AppTheme.THEME_1 -> resources.getColor(R.color.theme1_accent, null)
-            AppTheme.THEME_2 -> resources.getColor(R.color.theme2_accent, null)
-            AppTheme.THEME_3 -> resources.getColor(R.color.ios_blue, null)
-            AppTheme.THEME_4 -> resources.getColor(R.color.theme4_accent, null)
         }
         
         findViewById<View>(R.id.settings_root).setBackgroundColor(bgColor)
@@ -373,7 +369,7 @@ class SettingsActivity : AppCompatActivity() {
             val section = findViewById<View>(id) ?: return@forEach
             if (isIOS) {
                 section.setBackgroundResource(R.drawable.ios_card_bg)
-                section.elevation = 0f // Glass doesn't need much elevation
+                section.elevation = 0f
             } else {
                 section.background = null
                 section.elevation = 0f
