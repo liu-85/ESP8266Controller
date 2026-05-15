@@ -243,8 +243,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         mainWifiIcon.setOnClickListener {
-            if (appConfig?.connectionConfig?.connectionType != ConnectionType.WIFI) {
-                toggleConnectionType(ConnectionType.WIFI)
+            if (appConfig?.connectionConfig?.connectionType != ConnectionType.WIFI_TCP && 
+                appConfig?.connectionConfig?.connectionType != ConnectionType.WIFI_UDP) {
+                toggleConnectionType(ConnectionType.WIFI_TCP)
             } else {
                 reconnect()
             }
@@ -340,7 +341,11 @@ class MainActivity : AppCompatActivity() {
             val config = appConfig ?: return@launch
             
             connectionManager = when (config.connectionConfig.connectionType) {
-                ConnectionType.WIFI -> WifiConnectionManager(
+                ConnectionType.WIFI_TCP -> WifiConnectionManager(
+                    config.connectionConfig.wifiIp,
+                    config.connectionConfig.wifiPort
+                )
+                ConnectionType.WIFI_UDP -> UdpConnectionManager(
                     config.connectionConfig.wifiIp,
                     config.connectionConfig.wifiPort
                 )
@@ -350,7 +355,13 @@ class MainActivity : AppCompatActivity() {
                 )
             }
             
-            updateStatus("正在连接 ${if (config.connectionConfig.connectionType == ConnectionType.WIFI) "WIFI" else "蓝牙"}...")
+            val typeStr = when(config.connectionConfig.connectionType) {
+                ConnectionType.WIFI_TCP -> "WIFI (TCP)"
+                ConnectionType.WIFI_UDP -> "WIFI (UDP)"
+                ConnectionType.BLUETOOTH -> "蓝牙"
+            }
+            
+            updateStatus("正在连接 $typeStr...")
             val result = connectionManager?.connect()
             
             runOnUiThread {
@@ -370,30 +381,39 @@ class MainActivity : AppCompatActivity() {
         val currentType = config.connectionConfig.connectionType
         
         runOnUiThread {
+            val isWifi = currentType == ConnectionType.WIFI_TCP || currentType == ConnectionType.WIFI_UDP
+            val isBt = currentType == ConnectionType.BLUETOOTH
+
             // Update WiFi icon
-            mainWifiIcon.alpha = if (currentType == ConnectionType.WIFI && connected) 1.0f else 0.3f
-            mainWifiIcon.scaleX = if (currentType == ConnectionType.WIFI) 1.1f else 1.0f
-            mainWifiIcon.scaleY = if (currentType == ConnectionType.WIFI) 1.1f else 1.0f
+            mainWifiIcon.alpha = if (isWifi && connected) 1.0f else 0.3f
+            mainWifiIcon.scaleX = if (isWifi) 1.1f else 1.0f
+            mainWifiIcon.scaleY = if (isWifi) 1.1f else 1.0f
             
             // Update BT icon
-            mainBtIcon.alpha = if (currentType == ConnectionType.BLUETOOTH && connected) 1.0f else 0.3f
-            mainBtIcon.scaleX = if (currentType == ConnectionType.BLUETOOTH) 1.1f else 1.0f
-            mainBtIcon.scaleY = if (currentType == ConnectionType.BLUETOOTH) 1.1f else 1.0f
+            mainBtIcon.alpha = if (isBt && connected) 1.0f else 0.3f
+            mainBtIcon.scaleX = if (isBt) 1.1f else 1.0f
+            mainBtIcon.scaleY = if (isBt) 1.1f else 1.0f
             
             // Background indication
+            val isIOS = config.currentTheme == AppTheme.THEME_3
             val accentColor = when (config.currentTheme) {
                 AppTheme.THEME_1 -> resources.getColor(R.color.theme1_accent, null)
                 AppTheme.THEME_2 -> resources.getColor(R.color.theme2_accent, null)
-                AppTheme.THEME_3 -> resources.getColor(R.color.theme3_accent, null)
+                AppTheme.THEME_3 -> Color.parseColor("#007AFF")
                 AppTheme.THEME_4 -> resources.getColor(R.color.theme4_accent, null)
             }
             
             if (connected) {
-                if (currentType == ConnectionType.WIFI) mainWifiIcon.setTextColor(accentColor)
-                else mainBtIcon.setTextColor(accentColor)
+                if (isWifi) {
+                    mainWifiIcon.setTextColor(if (isIOS) Color.BLACK else accentColor)
+                    mainWifiIcon.text = if (currentType == ConnectionType.WIFI_UDP) "📶U" else "📶"
+                } else {
+                    mainBtIcon.setTextColor(if (isIOS) Color.BLACK else accentColor)
+                }
             } else {
-                mainWifiIcon.setTextColor(resources.getColor(R.color.white, null))
-                mainBtIcon.setTextColor(resources.getColor(R.color.white, null))
+                mainWifiIcon.setTextColor(if (isIOS) Color.BLACK else resources.getColor(R.color.white, null))
+                mainBtIcon.setTextColor(if (isIOS) Color.BLACK else resources.getColor(R.color.white, null))
+                mainWifiIcon.text = "📶"
             }
         }
     }
@@ -464,22 +484,7 @@ class MainActivity : AppCompatActivity() {
 
             // Reconnect if needed
             lifecycleScope.launch {
-                connectionManager?.disconnect()
-                when (appConfig!!.connectionConfig.connectionType) {
-                    ConnectionType.WIFI -> {
-                        connectionManager = WifiConnectionManager(
-                            appConfig!!.connectionConfig.wifiIp,
-                            appConfig!!.connectionConfig.wifiPort
-                        )
-                    }
-                    ConnectionType.BLUETOOTH -> {
-                        connectionManager = BluetoothConnectionManager(
-                            this@MainActivity,
-                            appConfig!!.connectionConfig.bluetoothAddress
-                        )
-                    }
-                }
-                connectionManager?.connect()
+                reconnect()
             }
         }
     }

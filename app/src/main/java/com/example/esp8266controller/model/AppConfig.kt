@@ -26,10 +26,15 @@ data class AppConfig(
         }
 
         private fun loadConnectionConfig(prefs: SharedPreferences): ConnectionConfig {
+            val typeStr = prefs.getString("connection_type", ConnectionType.WIFI_TCP.name) ?: ConnectionType.WIFI_TCP.name
+            val type = try {
+                if (typeStr == "WIFI") ConnectionType.WIFI_TCP else ConnectionType.valueOf(typeStr)
+            } catch (e: Exception) {
+                ConnectionType.WIFI_TCP
+            }
+            
             return ConnectionConfig(
-                connectionType = ConnectionType.valueOf(
-                    prefs.getString("connection_type", ConnectionType.WIFI.name) ?: ConnectionType.WIFI.name
-                ),
+                connectionType = type,
                 wifiIp = prefs.getString("wifi_ip", "192.168.2.169") ?: "192.168.2.169",
                 wifiPort = prefs.getInt("wifi_port", 2000),
                 bluetoothAddress = prefs.getString("bluetooth_address", "") ?: "",

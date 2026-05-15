@@ -49,6 +49,10 @@ class SettingsActivity : AppCompatActivity() {
     private lateinit var rbCurveLinear: RadioButton
     private lateinit var rbCurveExp: RadioButton
 
+    private lateinit var rgWifiProtocol: RadioGroup
+    private lateinit var rbProtoTcp: RadioButton
+    private lateinit var rbProtoUdp: RadioButton
+
     private lateinit var theme1Btn: Button
     private lateinit var theme2Btn: Button
     private lateinit var theme3Btn: Button
@@ -58,7 +62,7 @@ class SettingsActivity : AppCompatActivity() {
 
     private var appConfig: AppConfig? = null
     private var selectedTheme: AppTheme = AppTheme.THEME_1
-    private var connectionType: ConnectionType = ConnectionType.WIFI
+    private var connectionType: ConnectionType = ConnectionType.WIFI_TCP
     private var channelSources: MutableList<MutableList<ControlSource>> = mutableListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -74,7 +78,7 @@ class SettingsActivity : AppCompatActivity() {
     private fun loadConfig() {
         appConfig = AppConfig.load(this)
         selectedTheme = appConfig?.currentTheme ?: AppTheme.THEME_1
-        connectionType = appConfig?.connectionConfig?.connectionType ?: ConnectionType.WIFI
+        connectionType = appConfig?.connectionConfig?.connectionType ?: ConnectionType.WIFI_TCP
     }
 
     private fun initViews() {
@@ -108,6 +112,10 @@ class SettingsActivity : AppCompatActivity() {
         rbCurveLinear = findViewById(R.id.rb_curve_linear)
         rbCurveExp = findViewById(R.id.rb_curve_exp)
 
+        rgWifiProtocol = findViewById(R.id.rg_wifi_protocol)
+        rbProtoTcp = findViewById(R.id.rb_proto_tcp)
+        rbProtoUdp = findViewById(R.id.rb_proto_udp)
+
         theme1Btn = findViewById(R.id.theme1Btn)
         theme2Btn = findViewById(R.id.theme2Btn)
         theme3Btn = findViewById(R.id.theme3Btn)
@@ -129,7 +137,7 @@ class SettingsActivity : AppCompatActivity() {
         btnBack.setOnClickListener { finish() }
 
         wifiModeBtn.setOnClickListener {
-            connectionType = ConnectionType.WIFI
+            connectionType = ConnectionType.WIFI_TCP
             updateConnectionUI()
         }
 
@@ -316,9 +324,9 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun updateConnectionUI() {
-        wifiModeBtn.isSelected = connectionType == ConnectionType.WIFI
+        wifiModeBtn.isSelected = connectionType == ConnectionType.WIFI_TCP || connectionType == ConnectionType.WIFI_UDP
         btModeBtn.isSelected = connectionType == ConnectionType.BLUETOOTH
-        wifiSettings.visibility = if (connectionType == ConnectionType.WIFI) View.VISIBLE else View.GONE
+        wifiSettings.visibility = if (connectionType == ConnectionType.WIFI_TCP || connectionType == ConnectionType.WIFI_UDP) View.VISIBLE else View.GONE
         
         // Update connection status text based on input
         val ip = ipInput.text.toString()
@@ -428,6 +436,12 @@ class SettingsActivity : AppCompatActivity() {
                 rbCurveLinear.isChecked = true
             }
 
+            if (config.connectionConfig.connectionType == ConnectionType.WIFI_UDP) {
+                rbProtoUdp.isChecked = true
+            } else {
+                rbProtoTcp.isChecked = true
+            }
+
             channelSources = config.controlConfig.channelSources.map { it.toMutableList() }.toMutableList()
             spinners.forEachIndexed { index, _ ->
                 updateChannelTextView(index)
@@ -440,9 +454,15 @@ class SettingsActivity : AppCompatActivity() {
 
     private fun saveConfig() {
         appConfig?.let { config ->
+            val finalConnectionType = if (connectionType == ConnectionType.BLUETOOTH) {
+                ConnectionType.BLUETOOTH
+            } else {
+                if (rbProtoUdp.isChecked) ConnectionType.WIFI_UDP else ConnectionType.WIFI_TCP
+            }
+
             val newConfig = config.copy(
                 connectionConfig = config.connectionConfig.copy(
-                    connectionType = connectionType,
+                    connectionType = finalConnectionType,
                     wifiIp = ipInput.text.toString(),
                     wifiPort = portInput.text.toString().toIntOrNull() ?: 2000
                 ),

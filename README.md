@@ -1,8 +1,12 @@
 # RC遥控器 (ESP8266 控制器)
 
-这是一个功能强大的开源 Android 遥控器应用，专为模型车、船、无人机等 DIY 项目设计。通过 TCP (Wi-Fi) 或蓝牙连接 ESP8266/ESP32 设备。
+这是一个功能强大的开源 Android 遥控器应用，专为模型车、船、无人机等 DIY 项目设计。通过 TCP/UDP (Wi-Fi) 或蓝牙连接 ESP8266/ESP32 设备。
 
 ## 🌟 主要增强功能
+
+- **双协议 Wi-Fi 支持**：
+  - **TCP 模式**：数据传输稳定可靠，适合环境干扰较小的场景。
+  - **UDP 模式**：极低延迟，适合高速遥控或对实时性要求极高的场景（需硬件端支持）。
 
 - **非线性平滑控制**：摇杆与陀螺仪均采用非线性平滑算法（指数移动平均），可在设置中精细调节平滑系数。
 - **iOS 风格主题**：新增极简 iOS 风格主题，界面清爽且支持主题色动态切换。
@@ -16,7 +20,7 @@
 ## 📱 使用指南
 
 1. **连接设置**：
-   - **WIFI**：确保手机与 ESP8266 处于同一局域网，在设置中输入 IP 和端口（默认 2000）。
+   - **WIFI**：确保手机与 ESP8266 处于同一局域网，在设置中输入 IP 和端口（默认 2000）。可切换 TCP 或 UDP 协议。
    - **蓝牙**：在设置中点击“蓝牙”，从已配对列表中选择设备。
 2. **操控校准**：
    - 可以在设置中调整“舵机中位修正”以补偿机械安装误差。
@@ -25,25 +29,15 @@
 
 ## 🛠️ 硬件端示例 (Arduino IDE)
 
-以下是适配本应用的 ESP8266 核心代码示例。
-
+### 方案 A: TCP 接收 (稳定)
 ```cpp
 #include <ESP8266WiFi.h>
-#include <Servo.h>
 
-// WiFi配置
-const char* ssid = "你的WiFi名称";
-const char* password = "你的密码";
-
-WiFiServer server(2000); // 监听 2000 端口
-Servo steeringServo;
+WiFiServer server(2000); 
 
 void setup() {
-  Serial.begin(115200);
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) { delay(500); Serial.print("."); }
+  WiFi.begin("SSID", "PASSWORD");
   server.begin();
-  steeringServo.attach(13); // GPIO13 (D7)
 }
 
 void loop() {
@@ -52,20 +46,37 @@ void loop() {
     while (client.connected()) {
       if (client.available()) {
         String line = client.readStringUntil('\n');
-        line.trim();
         if (line.startsWith("SS2:")) {
           // 解析 SS2:油门,转向
-          int comma = line.indexOf(',');
-          int throttle = line.substring(4, comma).toInt(); // 1000-2000
-          int steering = line.substring(comma + 1).toInt(); // 1000-2000
-          
-          // 映射到舵机角度
-          int angle = map(steering, 1000, 2000, 0, 180);
-          steeringServo.write(angle);
-          
-          Serial.printf("油门: %d, 转向: %d\n", throttle, steering);
         }
       }
+    }
+  }
+}
+```
+
+### 方案 B: UDP 接收 (低延迟)
+```cpp
+#include <ESP8266WiFi.h>
+#include <WiFiUdp.h>
+
+WiFiUDP Udp;
+unsigned int localUdpPort = 2000;
+char packetBuffer[255];
+
+void setup() {
+  WiFi.begin("SSID", "PASSWORD");
+  Udp.begin(localUdpPort);
+}
+
+void loop() {
+  int packetSize = Udp.parsePacket();
+  if (packetSize) {
+    int len = Udp.read(packetBuffer, 255);
+    if (len > 0) packetBuffer[len] = 0;
+    String line = String(packetBuffer);
+    if (line.startsWith("SS2:")) {
+       // 解析 SS2:油门,转向
     }
   }
 }
@@ -84,5 +95,5 @@ void loop() {
 ## 📦 技术栈
 - **语言**: Kotlin / Java
 - **UI**: Android XML (iOS Style & V7RC Inspired)
-- **网络**: Java Socket (TCP), Android Bluetooth API
+- **网络**: Java Socket (TCP), Java DatagramSocket (UDP), Android Bluetooth API
 - **算法**: 指数平滑滤波, 映射映射算法

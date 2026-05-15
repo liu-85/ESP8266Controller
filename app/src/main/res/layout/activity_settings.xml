@@ -84,6 +84,17 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical">
                     <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="WIFI 设置" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="传输协议" style="@style/V7RCTextLabel" android:layout_marginTop="8dp" android:layout_marginBottom="4dp"/>
+                    <RadioGroup
+                        android:id="@+id/rg_wifi_protocol"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="8dp">
+                        <RadioButton android:id="@+id/rb_proto_tcp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="TCP (稳定)" android:textColor="@color/white" android:buttonTint="@color/v7rc_yellow"/>
+                        <RadioButton android:id="@+id/rb_proto_udp" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="UDP (低延迟)" android:textColor="@color/white" android:buttonTint="@color/v7rc_yellow" android:layout_marginStart="16dp"/>
+                    </RadioGroup>
+
                     <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="IP" style="@style/V7RCTextLabel" android:layout_marginEnd="8dp"/>
                         <EditText android:id="@+id/ipInput" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" style="@style/V7RCEditText" android:text="192.168.2.169" android:layout_marginEnd="8dp"/>

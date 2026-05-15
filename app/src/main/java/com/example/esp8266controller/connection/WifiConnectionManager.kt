@@ -11,7 +11,7 @@ class WifiConnectionManager(
     private val port: Int
 ) : ConnectionManager {
 
-    override val connectionType: ConnectionType = ConnectionType.WIFI
+    override val connectionType: ConnectionType = ConnectionType.WIFI_TCP
 
     private var _connectionState: ConnectionState = ConnectionState.Disconnected
     override val connectionState: ConnectionState
