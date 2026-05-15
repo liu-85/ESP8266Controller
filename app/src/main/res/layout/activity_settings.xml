@@ -278,8 +278,6 @@
             </LinearLayout>
 
         </LinearLayout>
-
-        </LinearLayout>
     </ScrollView>
 
     <!-- Invisible elements to maintain compatibility with existing code -->
