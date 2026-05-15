@@ -75,6 +75,7 @@ data class AppConfig(
                 isTimerEnabled = prefs.getBoolean("is_timer_enabled", false),
                 isGyroEnabled = prefs.getBoolean("is_gyro_enabled", false),
                 gyroSensitivity = prefs.getFloat("gyro_sensitivity", 1.0f),
+                smoothingFactor = prefs.getFloat("smoothing_factor", 0.5f),
                 enableVibration = prefs.getBoolean("enable_vibration", true)
             )
         }
@@ -107,6 +108,7 @@ data class AppConfig(
                 putBoolean("is_timer_enabled", config.controlConfig.isTimerEnabled)
                 putBoolean("is_gyro_enabled", config.controlConfig.isGyroEnabled)
                 putFloat("gyro_sensitivity", config.controlConfig.gyroSensitivity)
+                putFloat("smoothing_factor", config.controlConfig.smoothingFactor)
                 putBoolean("enable_vibration", config.controlConfig.enableVibration)
 
                 putString("app_theme", config.currentTheme.name)

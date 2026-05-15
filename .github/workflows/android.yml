@@ -5,6 +5,12 @@ on:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
+  workflow_dispatch:
+    inputs:
+      version_name:
+        description: 'Build Version (e.g. 1.2.3, defaults to date)'
+        required: false
+        default: ''
 
 jobs:
   build:
@@ -26,6 +32,16 @@ jobs:
 
     - name: Run tests and Lint
       run: ./gradlew test lintDebug --stacktrace
+
+    - name: Set Version
+      run: |
+        VERSION_NAME="${{ github.event.inputs.version_name }}"
+        if [ -z "$VERSION_NAME" ]; then
+          VERSION_NAME=$(date +'%Y%m%d')
+        fi
+        echo "BUILD_VERSION=$VERSION_NAME" >> $GITHUB_ENV
+        # Optionally update version in build.gradle
+        sed -i "s/versionName \".*\"/versionName \"$VERSION_NAME\"/" app/build.gradle
 
     - name: Build Debug APK
       run: ./gradlew assembleDebug --stacktrace

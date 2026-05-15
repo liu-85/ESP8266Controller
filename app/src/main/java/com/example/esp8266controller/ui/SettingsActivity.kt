@@ -29,6 +29,8 @@ class SettingsActivity : AppCompatActivity() {
 
     private lateinit var sbGyroSensitivity: SeekBar
     private lateinit var tvGyroSensitivityValue: TextView
+    private lateinit var sbSmoothing: SeekBar
+    private lateinit var tvSmoothingValue: TextView
 
     private lateinit var sbHeartbeat: SeekBar
     private lateinit var tvHeartbeatVal: TextView
@@ -82,6 +84,8 @@ class SettingsActivity : AppCompatActivity() {
 
         sbGyroSensitivity = findViewById(R.id.sb_gyro_sensitivity)
         tvGyroSensitivityValue = findViewById(R.id.tv_gyro_sensitivity_value)
+        sbSmoothing = findViewById(R.id.sb_smoothing)
+        tvSmoothingValue = findViewById(R.id.tv_smoothing_value)
         
         sbHeartbeat = findViewById(R.id.sb_heartbeat)
         tvHeartbeatVal = findViewById(R.id.tv_heartbeat_val)
@@ -122,7 +126,7 @@ class SettingsActivity : AppCompatActivity() {
         btModeBtn.setOnClickListener {
             connectionType = ConnectionType.BLUETOOTH
             updateConnectionUI()
-            scanBluetoothDevices()
+            showBluetoothDevicePicker()
         }
 
         saveConnectionBtn.setOnClickListener {
@@ -151,6 +155,15 @@ class SettingsActivity : AppCompatActivity() {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 val value = progress / 100f
                 tvGyroSensitivityValue.text = String.format("%.1f", value)
+            }
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        sbSmoothing.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                val value = progress / 100f
+                tvSmoothingValue.text = String.format("%.1f", value)
             }
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
@@ -216,6 +229,47 @@ class SettingsActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun showBluetoothDevicePicker() {
+        val bluetoothAdapter = BluetoothAdapter.getDefaultAdapter()
+        if (bluetoothAdapter == null) {
+            Toast.makeText(this, "该设备不支持蓝牙", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (!bluetoothAdapter.isEnabled) {
+            Toast.makeText(this, "请先开启蓝牙", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val bondedDevices = bluetoothAdapter.bondedDevices.toList()
+        if (bondedDevices.isEmpty()) {
+            Toast.makeText(this, "请先在系统设置中配对蓝牙设备", Toast.LENGTH_LONG).show()
+            return
+        }
+
+        val deviceNames = bondedDevices.map { "${it.name}\n${it.address}" }.toTypedArray()
+        
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setTitle("选择已配对的蓝牙设备")
+            .setItems(deviceNames) { _, which ->
+                val device = bondedDevices[which]
+                appConfig?.let { config ->
+                    val newConfig = config.copy(
+                        connectionConfig = config.connectionConfig.copy(
+                            connectionType = ConnectionType.BLUETOOTH,
+                            bluetoothAddress = device.address,
+                            bluetoothName = device.name ?: ""
+                        )
+                    )
+                    AppConfig.save(this, newConfig)
+                    appConfig = newConfig
+                    connectionStatus.text = "已选择蓝牙: ${device.name}"
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+
     private fun updateChannelTextView(index: Int) {
         val view = spinners[index]
         if (view is TextView) {
@@ -257,6 +311,9 @@ class SettingsActivity : AppCompatActivity() {
             sbGyroSensitivity.progress = (config.controlConfig.gyroSensitivity * 100).toInt()
             tvGyroSensitivityValue.text = String.format("%.1f", config.controlConfig.gyroSensitivity)
 
+            sbSmoothing.progress = (config.controlConfig.smoothingFactor * 100).toInt()
+            tvSmoothingValue.text = String.format("%.1f", config.controlConfig.smoothingFactor)
+
             sbHeartbeat.progress = config.controlConfig.heartbeatIntervalMs.toInt()
             tvHeartbeatVal.text = config.controlConfig.heartbeatIntervalMs.toString()
             
@@ -294,6 +351,7 @@ class SettingsActivity : AppCompatActivity() {
                 controlConfig = config.controlConfig.copy(
                     channelSources = channelSources,
                     gyroSensitivity = sbGyroSensitivity.progress / 100f,
+                    smoothingFactor = sbSmoothing.progress / 100f,
                     heartbeatIntervalMs = sbHeartbeat.progress.toLong(),
                     inactivityTimeoutMs = sbTimeout.progress.toLong() * 60000,
                     servoCenterOffset = sbServoOffset.progress - 100,

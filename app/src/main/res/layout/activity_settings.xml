@@ -33,6 +33,17 @@
         app:layout_constraintTop_toTopOf="@id/btn_back"
         android:layout_marginStart="16dp"/>
 
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/closeSettings"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_marginEnd="16dp"
+        android:text="保存"
+        style="@style/V7RCYellowButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@id/btn_back"
+        app:layout_constraintBottom_toBottomOf="@id/btn_back"/>
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -110,7 +121,7 @@
                 android:layout_marginBottom="16dp">
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme1Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="霓虹蓝粉" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme2Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="简约白" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
-                <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme3Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="浅灰" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
+                <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme3Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="iOS 风格" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
                 <androidx.appcompat.widget.AppCompatButton android:id="@+id/theme4Btn" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_columnWeight="1" android:text="清新绿蓝" style="@style/V7RCActionButton" android:layout_margin="4dp"/>
             </GridLayout>
 
@@ -174,7 +185,7 @@
 
             <!-- Gyro Sensitivity -->
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="陀螺仪灵敏度" style="@style/V7RCTextLabel" android:layout_marginTop="16dp" android:layout_marginBottom="8dp"/>
-            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical" android:layout_marginBottom="16dp">
                 <SeekBar
                     android:id="@+id/sb_gyro_sensitivity"
                     android:layout_width="0dp"
@@ -193,13 +204,26 @@
                     android:gravity="center"/>
             </LinearLayout>
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:id="@+id/closeSettings"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="保存并关闭"
-                style="@style/V7RCYellowButton"/>
+            <!-- Smoothing Settings -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="操控平滑度 (非线性)" style="@style/V7RCTextLabel" android:layout_marginBottom="8dp"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <SeekBar
+                    android:id="@+id/sb_smoothing"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:max="100"
+                    android:progress="50"
+                    android:progressTint="@color/v7rc_yellow"
+                    android:thumbTint="@color/v7rc_yellow"/>
+                <TextView
+                    android:id="@+id/tv_smoothing_value"
+                    android:layout_width="40dp"
+                    android:layout_height="wrap_content"
+                    android:text="0.5"
+                    android:textColor="@color/white"
+                    android:gravity="center"/>
+            </LinearLayout>
 
         </LinearLayout>
     </ScrollView>

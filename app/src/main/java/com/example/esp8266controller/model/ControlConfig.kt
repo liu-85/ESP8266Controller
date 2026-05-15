@@ -43,5 +43,6 @@ data class ControlConfig(
     val isTimerEnabled: Boolean = false, // 改为默认关闭，只有操作才动作
     val isGyroEnabled: Boolean = false,
     val gyroSensitivity: Float = 1.0f,
+    val smoothingFactor: Float = 0.5f, // 0.0 to 1.0, 1.0 means no smoothing
     val enableVibration: Boolean = true // 极限位置震动反馈
 )

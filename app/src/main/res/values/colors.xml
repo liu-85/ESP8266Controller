@@ -26,8 +26,8 @@
     <color name="theme1_accent">#00ccff</color>
     <color name="theme2_bg">#ffffff</color>
     <color name="theme2_accent">#ff9500</color>
-    <color name="theme3_bg">#f0f0f0</color>
-    <color name="theme3_accent">#1a3460</color>
+    <color name="theme3_bg">#F2F2F7</color>
+    <color name="theme3_accent">#007AFF</color>
     <color name="theme4_bg">#f8f8f0</color>
     <color name="theme4_accent">#88e0aa</color>
 </resources>

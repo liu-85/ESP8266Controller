@@ -7,6 +7,16 @@ import kotlin.math.*
 
 class JoystickDataProcessor(private val controlConfig: ControlConfig) {
 
+    private var smoothedLeftY = controlConfig.centerValue.toDouble()
+    private var smoothedLeftX = controlConfig.centerValue.toDouble()
+    private var smoothedRightY = controlConfig.centerValue.toDouble()
+    private var smoothedRightX = controlConfig.centerValue.toDouble()
+
+    fun applySmoothing(current: Int, previous: Double): Double {
+        val factor = controlConfig.smoothingFactor.toDouble().coerceIn(0.01, 1.0)
+        return previous + factor * (current - previous)
+    }
+
     fun applyThrottleCurve(value: Int): Int {
         if (controlConfig.throttleCurve == ThrottleCurve.LINEAR) return value
         
@@ -72,10 +82,22 @@ class JoystickDataProcessor(private val controlConfig: ControlConfig) {
         buttons: List<Boolean> = emptyList(),
         switches: List<Boolean> = emptyList()
     ): String {
+        // Apply smoothing
+        smoothedLeftY = applySmoothing(leftY, smoothedLeftY)
+        smoothedLeftX = applySmoothing(leftX, smoothedLeftX)
+        smoothedRightY = applySmoothing(rightY, smoothedRightY)
+        smoothedRightX = applySmoothing(rightX, smoothedRightX)
+
         // SS2 format: SS2:throttle,steering
         // Use CH1 (throttle) and CH2 (steering) from config
-        val throttle = getChannelValue(0, leftY, leftX, rightY, rightX, buttons, switches)
-        val steering = getChannelValue(1, leftY, leftX, rightY, rightX, buttons, switches)
+        val throttle = getChannelValue(0, 
+            smoothedLeftY.toInt(), smoothedLeftX.toInt(), 
+            smoothedRightY.toInt(), smoothedRightX.toInt(), 
+            buttons, switches)
+        val steering = getChannelValue(1, 
+            smoothedLeftY.toInt(), smoothedLeftX.toInt(), 
+            smoothedRightY.toInt(), smoothedRightX.toInt(), 
+            buttons, switches)
         
         return "SS2:$throttle,$steering\n"
     }
