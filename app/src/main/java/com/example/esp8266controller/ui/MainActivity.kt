@@ -85,6 +85,11 @@ class MainActivity : AppCompatActivity() {
         startControlLoop() // Start a continuous loop for smooth control
         applyTheme()
         hideSystemUI()
+
+        // Listen for layout changes to update gesture exclusion
+        mainLayout.addOnLayoutChangeListener { _, _, _, _, _, _, _, _, _ ->
+            setupGestureExclusion()
+        }
     }
 
     override fun onBackPressed() {
@@ -125,24 +130,42 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupGestureExclusion() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val exclusionRects = mutableListOf<Rect>()
-            
-            // Exclude left joystick area
-            val leftRect = Rect()
-            leftJoystick.getGlobalVisibleRect(leftRect)
-            exclusionRects.add(leftRect)
-            
-            // Exclude right joystick area
-            val rightRect = Rect()
-            rightJoystick.getGlobalVisibleRect(rightRect)
-            exclusionRects.add(rightRect)
-            
-            // Add a bit of padding to the rects to ensure edge touches are captured
-            exclusionRects.forEach { rect ->
-                rect.inset(-50, -50) // Expand the exclusion zone by 50px
-            }
+            mainLayout.post {
+                val exclusionRects = mutableListOf<Rect>()
+                
+                // Get display metrics to calculate DP to PX
+                val density = resources.displayMetrics.density
+                val exclusionWidthPx = (200 * density).toInt() // Android limit is 200dp
+                val screenHeight = resources.displayMetrics.heightPixels
+                val screenWidth = resources.displayMetrics.widthPixels
 
-            mainLayout.systemGestureExclusionRects = exclusionRects
+                // 1. Left edge exclusion (covers back gesture area near joystick)
+                val leftJoystickRect = Rect()
+                leftJoystick.getGlobalVisibleRect(leftJoystickRect)
+                val leftExclusion = Rect(
+                    0, 
+                    leftJoystickRect.top - 100, 
+                    exclusionWidthPx.coerceAtMost(leftJoystickRect.right), 
+                    leftJoystickRect.bottom + 100
+                )
+                exclusionRects.add(leftExclusion)
+                
+                // 2. Right edge exclusion (covers back gesture area near joystick)
+                val rightJoystickRect = Rect()
+                rightJoystick.getGlobalVisibleRect(rightJoystickRect)
+                val rightExclusion = Rect(
+                    (screenWidth - exclusionWidthPx).coerceAtLeast(rightJoystickRect.left), 
+                    rightJoystickRect.top - 100, 
+                    screenWidth, 
+                    rightJoystickRect.bottom + 100
+                )
+                exclusionRects.add(rightExclusion)
+                
+                // 3. Bottom edge exclusion (optional, to prevent home gesture if needed)
+                // But usually, joysticks are not at the very bottom center.
+                
+                mainLayout.systemGestureExclusionRects = exclusionRects
+            }
         }
     }
 
