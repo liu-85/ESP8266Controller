@@ -4,6 +4,8 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.Rect
+import android.os.Build
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -68,6 +70,12 @@ class JoystickView @JvmOverloads constructor(
 
         innerCircleX = centerX
         innerCircleY = centerY
+
+        // Add System Gesture Exclusion for Android 10+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val rect = Rect(0, 0, w, h)
+            systemGestureExclusionRects = listOf(rect)
+        }
     }
 
     override fun onDraw(canvas: Canvas) {
