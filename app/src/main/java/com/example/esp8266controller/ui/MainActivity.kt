@@ -382,7 +382,24 @@ class MainActivity : AppCompatActivity() {
         switch1.setOnCheckedChangeListener { _, _ -> sendControlData() }
         switch2.setOnCheckedChangeListener { _, _ -> sendControlData() }
 
+        setupExitSlider()
         updateToggleButtons()
+    }
+
+    private fun setupExitSlider() {
+        leftJoystick.setOnSwipeOutListener {
+            returnToHome()
+        }
+        rightJoystick.setOnSwipeOutListener {
+            returnToHome()
+        }
+    }
+
+    private fun returnToHome() {
+        val intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_HOME)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
     }
 
     private fun updateToggleButtons() {

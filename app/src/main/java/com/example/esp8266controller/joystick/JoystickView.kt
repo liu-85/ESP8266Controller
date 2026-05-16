@@ -30,6 +30,7 @@ class JoystickView @JvmOverloads constructor(
     private var activePointerId: Int = -1
 
     private var onJoystickMoveListener: ((angle: Double, strength: Float) -> Unit)? = null
+    private var onSwipeOutListener: (() -> Unit)? = null
 
     var angle: Double = 0.0
     var strength: Float = 0.0f
@@ -131,6 +132,11 @@ class JoystickView @JvmOverloads constructor(
             val ratio = joystickRadius / dist
             innerCircleX = centerX + dx * ratio
             innerCircleY = centerY + dy * ratio
+            
+            // Check for swipe out (e.g., if touch is 2x the radius away)
+            if (dist > joystickRadius * 2.5f) {
+                onSwipeOutListener?.invoke()
+            }
         }
 
         // Calculate angle (0° = top, 90° = right, 180° = bottom, 270° = left)
@@ -156,6 +162,10 @@ class JoystickView @JvmOverloads constructor(
 
     fun setOnJoystickMoveListener(listener: (angle: Double, strength: Float) -> Unit) {
         this.onJoystickMoveListener = listener
+    }
+
+    fun setOnSwipeOutListener(listener: () -> Unit) {
+        this.onSwipeOutListener = listener
     }
 
     fun reset() {
