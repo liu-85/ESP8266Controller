@@ -118,6 +118,11 @@ class MainActivity : AppCompatActivity() {
                     or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                     or View.SYSTEM_UI_FLAG_FULLSCREEN)
         }
+        
+        // Block window-level gestures if possible (limited availability)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            window.attributes.layoutInDisplayCutoutMode = android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        }
     }
 
     override fun onWindowFocusChanged(hasFocus: Boolean) {
@@ -133,36 +138,27 @@ class MainActivity : AppCompatActivity() {
             mainLayout.post {
                 val exclusionRects = mutableListOf<Rect>()
                 
-                // Get display metrics to calculate DP to PX
-                val density = resources.displayMetrics.density
-                val exclusionWidthPx = (200 * density).toInt() // Android limit is 200dp
-                val screenHeight = resources.displayMetrics.heightPixels
+                // Get display metrics
                 val screenWidth = resources.displayMetrics.widthPixels
+                val screenHeight = resources.displayMetrics.heightPixels
 
-                // 1. Left edge exclusion (covers back gesture area near joystick)
-                val leftJoystickRect = Rect()
-                leftJoystick.getGlobalVisibleRect(leftJoystickRect)
-                val leftExclusion = Rect(
-                    0, 
-                    leftJoystickRect.top - 100, 
-                    exclusionWidthPx.coerceAtMost(leftJoystickRect.right), 
-                    leftJoystickRect.bottom + 100
-                )
-                exclusionRects.add(leftExclusion)
+                // Aggressive Exclusion: 
+                // Instead of just the joystick, exclude the ENTIRE left and right vertical edges
+                // where the back gesture is usually triggered.
+                // Android limit is 200dp per side, we take full height.
                 
-                // 2. Right edge exclusion (covers back gesture area near joystick)
-                val rightJoystickRect = Rect()
-                rightJoystick.getGlobalVisibleRect(rightJoystickRect)
-                val rightExclusion = Rect(
-                    (screenWidth - exclusionWidthPx).coerceAtLeast(rightJoystickRect.left), 
-                    rightJoystickRect.top - 100, 
-                    screenWidth, 
-                    rightJoystickRect.bottom + 100
-                )
-                exclusionRects.add(rightExclusion)
+                val density = resources.displayMetrics.density
+                val exclusionWidthPx = (200 * density).toInt()
+
+                // Left vertical bar (from top to bottom)
+                exclusionRects.add(Rect(0, 0, exclusionWidthPx, screenHeight))
                 
-                // 3. Bottom edge exclusion (optional, to prevent home gesture if needed)
-                // But usually, joysticks are not at the very bottom center.
+                // Right vertical bar (from top to bottom)
+                exclusionRects.add(Rect(screenWidth - exclusionWidthPx, 0, screenWidth, screenHeight))
+                
+                // Bottom bar (to prevent home gesture if user swipes up near joystick)
+                // Note: System might ignore if total height exceeds 200dp, 
+                // but we prioritize vertical edges for S22U back gesture.
                 
                 mainLayout.systemGestureExclusionRects = exclusionRects
             }
