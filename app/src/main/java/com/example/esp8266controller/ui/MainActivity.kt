@@ -601,11 +601,17 @@ class MainActivity : AppCompatActivity() {
 
     private fun triggerVibration() {
         if (appConfig?.controlConfig?.enableVibration == true) {
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                vibrator.vibrate(android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(50)
+            try {
+                if (ActivityCompat.checkSelfPermission(this, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED) {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                        vibrator.vibrate(android.os.VibrationEffect.createOneShot(50, android.os.VibrationEffect.DEFAULT_AMPLITUDE))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        vibrator.vibrate(50)
+                    }
+                }
+            } catch (e: SecurityException) {
+                // Fallback if permission is missing despite declaration
             }
         }
     }
@@ -636,7 +642,7 @@ class MainActivity : AppCompatActivity() {
         gyroController.stop()
     }
 
-    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         // Force the app to stay in immersive mode on every touch
         hideSystemUI()
         return super.dispatchTouchEvent(ev)
