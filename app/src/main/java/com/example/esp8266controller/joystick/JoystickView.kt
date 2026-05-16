@@ -81,6 +81,9 @@ class JoystickView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        // Prevent parent from intercepting touch events (like pull-to-refresh or swipe)
+        parent?.requestDisallowInterceptTouchEvent(true)
+
         when (event.action) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
                 val dx = event.x - centerX

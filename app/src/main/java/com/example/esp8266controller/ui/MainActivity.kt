@@ -24,6 +24,10 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.Manifest
 
+import android.graphics.Rect
+import android.view.WindowInsets
+import android.view.WindowInsetsController
+
 class MainActivity : AppCompatActivity() {
 
     private lateinit var mainLayout: View
@@ -60,6 +64,7 @@ class MainActivity : AppCompatActivity() {
     private var targetLeftX: Int = 1500
     private var targetRightY: Int = 1500
     private var targetRightX: Int = 1500
+    private var lastBackPressTime: Long = 0
 
     private lateinit var vibrator: android.os.Vibrator
 
@@ -79,6 +84,66 @@ class MainActivity : AppCompatActivity() {
         setupTimeoutCheck()
         startControlLoop() // Start a continuous loop for smooth control
         applyTheme()
+        hideSystemUI()
+    }
+
+    override fun onBackPressed() {
+        val currentTime = System.currentTimeMillis()
+        if (currentTime - lastBackPressTime < 2000) {
+            super.onBackPressed()
+        } else {
+            lastBackPressTime = currentTime
+            Toast.makeText(this, "再按一次退出应用", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun hideSystemUI() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            window.setDecorFitsSystemWindows(false)
+            window.insetsController?.let { controller ->
+                controller.hide(WindowInsets.Type.statusBars() or WindowInsets.Type.navigationBars())
+                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            }
+        } else {
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                    or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN)
+        }
+    }
+
+    override fun onWindowFocusChanged(hasFocus: Boolean) {
+        super.onWindowFocusChanged(hasFocus)
+        if (hasFocus) {
+            hideSystemUI()
+            setupGestureExclusion()
+        }
+    }
+
+    private fun setupGestureExclusion() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            val exclusionRects = mutableListOf<Rect>()
+            
+            // Exclude left joystick area
+            val leftRect = Rect()
+            leftJoystick.getGlobalVisibleRect(leftRect)
+            exclusionRects.add(leftRect)
+            
+            // Exclude right joystick area
+            val rightRect = Rect()
+            rightJoystick.getGlobalVisibleRect(rightRect)
+            exclusionRects.add(rightRect)
+            
+            // Add a bit of padding to the rects to ensure edge touches are captured
+            exclusionRects.forEach { rect ->
+                rect.inset(-50, -50) // Expand the exclusion zone by 50px
+            }
+
+            mainLayout.systemGestureExclusionRects = exclusionRects
+        }
     }
 
     private fun startControlLoop() {
