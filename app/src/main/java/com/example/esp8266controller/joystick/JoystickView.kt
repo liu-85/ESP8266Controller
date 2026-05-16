@@ -27,6 +27,8 @@ class JoystickView @JvmOverloads constructor(
     private val innerPaint: Paint = Paint()
     private val ringPaint: Paint = Paint()
 
+    private var activePointerId: Int = -1
+
     private var onJoystickMoveListener: ((angle: Double, strength: Float) -> Unit)? = null
 
     var angle: Double = 0.0
@@ -81,43 +83,60 @@ class JoystickView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        // Prevent parent from intercepting touch events (like pull-to-refresh or swipe)
-        parent?.requestDisallowInterceptTouchEvent(true)
-
-        when (event.action) {
-            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_MOVE -> {
-                val dx = event.x - centerX
-                val dy = event.y - centerY
-                val dist = sqrt((dx * dx + dy * dy).toDouble()).toFloat()
-
-                if (dist <= joystickRadius) {
-                    innerCircleX = event.x
-                    innerCircleY = event.y
-                } else {
-                    val ratio = joystickRadius / dist
-                    innerCircleX = centerX + dx * ratio
-                    innerCircleY = centerY + dy * ratio
+        when (event.actionMasked) {
+            MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+                // If we don't have an active pointer, take this one
+                if (activePointerId == -1) {
+                    val pointerIndex = event.actionIndex
+                    activePointerId = event.getPointerId(pointerIndex)
+                    parent?.requestDisallowInterceptTouchEvent(true)
+                    updateJoystickPosition(event.getX(pointerIndex), event.getY(pointerIndex))
                 }
-
-                // Calculate angle (0° = top, 90° = right, 180° = bottom, 270° = left)
-                angle = atan2((innerCircleY - centerY).toDouble(), (innerCircleX - centerX).toDouble()) * (180 / PI) + 90
-                if (angle < 0) angle += 360.0
-
-                // Calculate strength (0.0 to 1.0)
-                val currentDist = sqrt(
-                    (innerCircleX - centerX).toDouble().pow(2.0) +
-                        (innerCircleY - centerY).toDouble().pow(2.0)
-                ).toFloat()
-                strength = if (joystickRadius > 0) (currentDist / joystickRadius).coerceIn(0f, 1f) else 0f
-
-                onJoystickMoveListener?.invoke(angle, strength)
-                postInvalidate()
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                reset()
+            MotionEvent.ACTION_MOVE -> {
+                val pointerIndex = event.findPointerIndex(activePointerId)
+                if (pointerIndex != -1) {
+                    updateJoystickPosition(event.getX(pointerIndex), event.getY(pointerIndex))
+                }
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_POINTER_UP, MotionEvent.ACTION_CANCEL -> {
+                val pointerId = event.getPointerId(event.actionIndex)
+                if (pointerId == activePointerId) {
+                    activePointerId = -1
+                    reset()
+                }
             }
         }
         return true
+    }
+
+    private fun updateJoystickPosition(touchX: Float, touchY: Float) {
+        val dx = touchX - centerX
+        val dy = touchY - centerY
+        val dist = sqrt((dx * dx + dy * dy).toDouble()).toFloat()
+
+        if (dist <= joystickRadius) {
+            innerCircleX = touchX
+            innerCircleY = touchY
+        } else {
+            val ratio = joystickRadius / dist
+            innerCircleX = centerX + dx * ratio
+            innerCircleY = centerY + dy * ratio
+        }
+
+        // Calculate angle (0° = top, 90° = right, 180° = bottom, 270° = left)
+        angle = atan2((innerCircleY - centerY).toDouble(), (innerCircleX - centerX).toDouble()) * (180 / PI) + 90
+        if (angle < 0) angle += 360.0
+
+        // Calculate strength (0.0 to 1.0)
+        val currentDist = sqrt(
+            (innerCircleX - centerX).toDouble().pow(2.0) +
+                (innerCircleY - centerY).toDouble().pow(2.0)
+        ).toFloat()
+        strength = if (joystickRadius > 0) (currentDist / joystickRadius).coerceIn(0f, 1f) else 0f
+
+        onJoystickMoveListener?.invoke(angle, strength)
+        postInvalidate()
     }
 
     fun setColors(outerColor: Int, innerColor: Int) {
