@@ -27,6 +27,7 @@ import android.Manifest
 import android.graphics.Rect
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import android.view.MotionEvent
 
 class MainActivity : AppCompatActivity() {
 
@@ -665,7 +666,7 @@ class MainActivity : AppCompatActivity() {
         return super.dispatchTouchEvent(ev)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == BT_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
