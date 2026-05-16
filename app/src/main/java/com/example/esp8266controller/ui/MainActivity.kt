@@ -605,6 +605,12 @@ class MainActivity : AppCompatActivity() {
         gyroController.stop()
     }
 
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        // Force the app to stay in immersive mode on every touch
+        hideSystemUI()
+        return super.dispatchTouchEvent(ev)
+    }
+
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == BT_PERMISSION_REQUEST_CODE) {
