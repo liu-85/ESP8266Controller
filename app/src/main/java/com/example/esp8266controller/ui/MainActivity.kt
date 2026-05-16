@@ -382,6 +382,16 @@ class MainActivity : AppCompatActivity() {
         switch1.setOnCheckedChangeListener { _, _ -> sendControlData() }
         switch2.setOnCheckedChangeListener { _, _ -> sendControlData() }
 
+        // Step 2: Set a touch listener on the root layout to consume any touches
+        // that fall outside of active controls (buttons/joysticks).
+        // This prevents these touches from leaking to the system gesture area.
+        mainLayout.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                hideSystemUI()
+            }
+            true // Consume the event
+        }
+
         setupExitSlider()
         updateToggleButtons()
     }
