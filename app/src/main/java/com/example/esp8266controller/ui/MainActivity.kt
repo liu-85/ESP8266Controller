@@ -48,6 +48,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var openSettings: ImageButton
 
     private lateinit var gyroToggle: Button
+    private lateinit var exitSliderKnob: TextView
+    private lateinit var exitSliderContainer: View
+    private var sliderInitialX = 0f
 
     private var connectionManager: ConnectionManager? = null
     private var appConfig: AppConfig? = null
@@ -256,6 +259,8 @@ class MainActivity : AppCompatActivity() {
         openSettings = findViewById(R.id.openSettings)
 
         gyroToggle = findViewById(R.id.gyroToggle)
+        exitSliderKnob = findViewById(R.id.exit_slider_knob)
+        exitSliderContainer = findViewById(R.id.exit_slider_container)
     }
 
     private fun applyTheme() {
@@ -380,7 +385,54 @@ class MainActivity : AppCompatActivity() {
         switch1.setOnCheckedChangeListener { _, _ -> sendControlData() }
         switch2.setOnCheckedChangeListener { _, _ -> sendControlData() }
 
+        setupExitSlider()
         updateToggleButtons()
+    }
+
+    private var isReturningHome = false
+
+    private fun setupExitSlider() {
+        exitSliderKnob.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    isReturningHome = false
+                    // clientX in JS is like event.x (view relative)
+                    // screenX in JS is like event.rawX (screen relative)
+                    sliderInitialX = event.rawX
+                    v.animate().cancel()
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (isReturningHome) return@setOnTouchListener true
+                    
+                    val deltaX = event.rawX - sliderInitialX
+                    val maxMove = 100 * resources.displayMetrics.density
+                    
+                    // We use rawX to calculate movement, similar to how JS uses screenX
+                    v.translationX = deltaX.coerceIn(-maxMove, maxMove)
+                    
+                    // If dragged to the "specific area" (edges of the track)
+                    if (Math.abs(v.translationX) >= maxMove * 0.95f) {
+                        isReturningHome = true
+                        returnToHome()
+                    }
+                    true
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                    // Reset position like 'reset' function in JS UI.txt
+                    v.animate().translationX(0f).setDuration(300).start()
+                    true
+                }
+                else -> false
+            }
+        }
+    }
+
+    private fun returnToHome() {
+        val intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_HOME)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
     }
 
     private fun updateToggleButtons() {
@@ -525,7 +577,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateStatus(text: String) {
-        status_bar.text = text
+        runOnUiThread {
+            status_bar.text = text
+        }
     }
 
     private fun setupGyroController() {
@@ -605,13 +659,13 @@ class MainActivity : AppCompatActivity() {
         gyroController.stop()
     }
 
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         // Force the app to stay in immersive mode on every touch
         hideSystemUI()
         return super.dispatchTouchEvent(ev)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == BT_PERMISSION_REQUEST_CODE) {
             if (grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
