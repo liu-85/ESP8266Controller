@@ -49,9 +49,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var openSettings: ImageButton
 
     private lateinit var gyroToggle: Button
-    private lateinit var exitSliderKnob: TextView
-    private lateinit var exitSliderContainer: View
-    private var sliderInitialX = 0f
 
     private var connectionManager: ConnectionManager? = null
     private var appConfig: AppConfig? = null
@@ -154,15 +151,16 @@ class MainActivity : AppCompatActivity() {
                 val density = resources.displayMetrics.density
                 val exclusionWidthPx = (200 * density).toInt()
 
-                // Left vertical bar (from top to bottom)
+                // Left vertical bar (from top to bottom) - prevent Back gesture
                 exclusionRects.add(Rect(0, 0, exclusionWidthPx, screenHeight))
                 
-                // Right vertical bar (from top to bottom)
+                // Right vertical bar (from top to bottom) - prevent Back gesture
                 exclusionRects.add(Rect(screenWidth - exclusionWidthPx, 0, screenWidth, screenHeight))
                 
-                // Bottom bar (to prevent home gesture if user swipes up near joystick)
-                // Note: System might ignore if total height exceeds 200dp, 
-                // but we prioritize vertical edges for S22U back gesture.
+                // Bottom bar - prevent Home/Task switcher gesture
+                // We exclude the bottom 100dp to ensure joystick swipes don't trigger system home
+                val exclusionHeightPx = (100 * density).toInt()
+                exclusionRects.add(Rect(0, screenHeight - exclusionHeightPx, screenWidth, screenHeight))
                 
                 mainLayout.systemGestureExclusionRects = exclusionRects
             }
@@ -260,8 +258,6 @@ class MainActivity : AppCompatActivity() {
         openSettings = findViewById(R.id.openSettings)
 
         gyroToggle = findViewById(R.id.gyroToggle)
-        exitSliderKnob = findViewById(R.id.exit_slider_knob)
-        exitSliderContainer = findViewById(R.id.exit_slider_container)
     }
 
     private fun applyTheme() {
@@ -386,54 +382,7 @@ class MainActivity : AppCompatActivity() {
         switch1.setOnCheckedChangeListener { _, _ -> sendControlData() }
         switch2.setOnCheckedChangeListener { _, _ -> sendControlData() }
 
-        setupExitSlider()
         updateToggleButtons()
-    }
-
-    private var isReturningHome = false
-
-    private fun setupExitSlider() {
-        exitSliderKnob.setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    isReturningHome = false
-                    // clientX in JS is like event.x (view relative)
-                    // screenX in JS is like event.rawX (screen relative)
-                    sliderInitialX = event.rawX
-                    v.animate().cancel()
-                    true
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    if (isReturningHome) return@setOnTouchListener true
-                    
-                    val deltaX = event.rawX - sliderInitialX
-                    val maxMove = 100 * resources.displayMetrics.density
-                    
-                    // We use rawX to calculate movement, similar to how JS uses screenX
-                    v.translationX = deltaX.coerceIn(-maxMove, maxMove)
-                    
-                    // If dragged to the "specific area" (edges of the track)
-                    if (Math.abs(v.translationX) >= maxMove * 0.95f) {
-                        isReturningHome = true
-                        returnToHome()
-                    }
-                    true
-                }
-                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    // Reset position like 'reset' function in JS UI.txt
-                    v.animate().translationX(0f).setDuration(300).start()
-                    true
-                }
-                else -> false
-            }
-        }
-    }
-
-    private fun returnToHome() {
-        val intent = Intent(Intent.ACTION_MAIN)
-        intent.addCategory(Intent.CATEGORY_HOME)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
-        startActivity(intent)
     }
 
     private fun updateToggleButtons() {

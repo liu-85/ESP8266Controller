@@ -83,22 +83,25 @@ class JoystickView @JvmOverloads constructor(
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        // Forcefully request parent to not intercept as soon as any touch happens
+        // Forcefully request parent to not intercept as soon as any touch happens.
+        // This is crucial to prevent system gestures (like back) from triggering 
+        // while the user is interacting with the joystick.
         parent?.requestDisallowInterceptTouchEvent(true)
 
         when (event.actionMasked) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
+                val pointerIndex = event.actionIndex
+                val pointerId = event.getPointerId(pointerIndex)
+                
                 // If we don't have an active pointer, take this one
                 if (activePointerId == -1) {
-                    val pointerIndex = event.actionIndex
-                    activePointerId = event.getPointerId(pointerIndex)
+                    activePointerId = pointerId
                     updateJoystickPosition(event.getX(pointerIndex), event.getY(pointerIndex))
                 }
             }
             MotionEvent.ACTION_MOVE -> {
                 val pointerIndex = event.findPointerIndex(activePointerId)
                 if (pointerIndex != -1) {
-                    // Use getX/getY which are relative to this View's coordinate system
                     updateJoystickPosition(event.getX(pointerIndex), event.getY(pointerIndex))
                 }
             }
@@ -111,6 +114,8 @@ class JoystickView @JvmOverloads constructor(
                 }
             }
         }
+        // Always return true to consume the event and prevent it from leaking to 
+        // system gesture handlers or other views.
         return true
     }
 
